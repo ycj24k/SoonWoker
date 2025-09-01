@@ -611,7 +611,7 @@
                       <el-table-column
                         :label="$t('index.state')"
                         prop="JobStatus"
-                        width="95">
+                        width="135">
                         <template slot-scope="scope">
                           <el-dropdown
                             trigger="click"
@@ -620,7 +620,7 @@
                             <span
                               class="el-dropdown-link"
                               style="color: #000; font-size: 12px">
-                              {{ jobState(scope.row.JobStatus) }}
+                              {{ jobState(scope.row.JobStatus) }}<b v-if="scope.row.JobStatus === 'Copying'" style="margin-left: 3px;">{{ scope.row.CopySpeed ? Math.ceil(parseFloat(scope.row.CopySpeed)*10)/10 : '0.0' }}MB/s</b>
                               <i
                                 class="el-icon-arrow-down el-icon--right"
                                 v-if="scope.row.JobStatus == 'Fail'"></i>
