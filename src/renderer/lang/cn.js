@@ -1,4 +1,14 @@
 export default {
+  recorder: {
+    startRecording: "开始录制",
+    stopRecording: "停止录制",
+    recordingStarted: "开始录制屏幕",
+    recordingStopped: "录制已停止",
+    savedSuccess: "录制已保存",
+    startFailed: "启动录制失败",
+    stopFailed: "停止录制失败",
+    saveFailed: "保存录制失败"
+  },
   finger: {
     intTips: "指纹模块正在初始化",
     errorInttips: "指纹模块初始化失败",

@@ -251,6 +251,14 @@
               {{ $t('work.senior') }}
             </el-button>
           </el-popover>
+          <!-- 屏幕录制按钮 -->
+          <screen-recorder 
+            ref="screenRecorder"
+            @recording-started="onRecordingStarted"
+            @recording-stopped="onRecordingStopped"
+            @recording-saved="onRecordingSaved"
+            style="margin-left: 10px; display: inline-block;"
+          />
         </div>
       </div>
       <el-row
@@ -1145,6 +1153,7 @@ function getNowFormatDate() {
   return currentdate
 }
 import Files from './files/file.vue'
+import ScreenRecorder from './recorder/ScreenRecorder.vue'
 let fs = require('fs')
 let path = require('path')
 const { app, dialog } = require('@electron/remote')
@@ -1182,7 +1191,8 @@ export default {
     }
   },
   components: {
-    Files
+    Files,
+    ScreenRecorder
   },
   data() {
     return {
@@ -1396,6 +1406,23 @@ export default {
   },
   updated() {},
   methods: {
+    // 录制相关方法
+    onRecordingStarted() {
+      console.log('录制已开始')
+    },
+    onRecordingStopped() {
+      console.log('录制已停止')
+    },
+    onRecordingSaved(result) {
+      console.log('录制已保存:', result)
+      this.$message.success(`录制已保存: ${result.fileName}`)
+    },
+    async stopRecordingIfActive() {
+      // 如果正在录制，则停止录制
+      if (this.$refs.screenRecorder) {
+        await this.$refs.screenRecorder.stopIfRecording()
+      }
+    },
     addFolder() {
       this.$refs.files.addFolder()
     },
@@ -2025,7 +2052,10 @@ export default {
       //}, 0);
       //console.log(1);
     },
-    submit() {
+    async submit() {
+      // 停止录制（如果正在录制）
+      await this.stopRecordingIfActive()
+      
       //提交最终的任务请求
       let data = ''
       let pathName

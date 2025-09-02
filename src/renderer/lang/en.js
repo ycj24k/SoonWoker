@@ -1,4 +1,14 @@
 export default {
+  recorder: {
+    startRecording: "Start Recording",
+    stopRecording: "Stop Recording",
+    recordingStarted: "Screen recording started",
+    recordingStopped: "Recording stopped",
+    savedSuccess: "Recording saved",
+    startFailed: "Failed to start recording",
+    stopFailed: "Failed to stop recording",
+    saveFailed: "Failed to save recording"
+  },
   finger: {
     intTips: "The fingerprint module is initializing",
     errorInttips: "Fingerprint module initialization fail",
