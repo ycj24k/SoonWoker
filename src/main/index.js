@@ -3,6 +3,7 @@ import "../renderer/store";
 const fs = require('fs');
 const child_process = require('child_process');
 const path = require('path')
+const recorder = require('./recorder');
 // require("./fingerprint/win");
 let root = "";
 if (process.env.NODE_ENV !== "development") {
@@ -65,6 +66,7 @@ function createWindow() {
   //mainWindow.webContents.openDevTools({mode:'bottom'});
   require("@electron/remote/main").initialize();
   require("@electron/remote/main").enable(mainWindow.webContents);
+  recorder.setMainWindow(mainWindow);
   mainWindow.loadURL(winURL);
 
   mainWindow.on("closed", () => {
