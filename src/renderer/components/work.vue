@@ -251,6 +251,22 @@
               {{ $t('work.senior') }}
             </el-button>
           </el-popover>
+          <!-- 屏幕录制按钮 -->
+              <screen-recorder
+      ref="screenRecorder"
+      @recording-started="onRecordingStarted"
+      @recording-stopped="onRecordingStopped"
+      @recording-saved="onRecordingSaved"
+      style="margin-left: 10px; display: inline-block;"
+    />
+    
+    <!-- 网络路径认证对话框 -->
+    <network-auth-dialog
+      :visible="networkAuthVisible"
+      :network-paths="networkAuthPaths"
+      @confirm="onNetworkAuthConfirm"
+      @cancel="onNetworkAuthCancel"
+    />
         </div>
       </div>
       <el-row
@@ -1145,6 +1161,8 @@ function getNowFormatDate() {
   return currentdate
 }
 import Files from './files/file.vue'
+import ScreenRecorder from './recorder/ScreenRecorder.vue'
+import NetworkAuthDialog from './NetworkAuthDialog.vue'
 let fs = require('fs')
 let path = require('path')
 const { app, dialog } = require('@electron/remote')
@@ -1182,10 +1200,17 @@ export default {
     }
   },
   components: {
-    Files
+    Files,
+    ScreenRecorder,
+    NetworkAuthDialog
   },
   data() {
     return {
+      // 网络路径认证相关
+      networkAuthVisible: false,
+      networkAuthPaths: [],
+      networkCredentials: {},
+      
       // 模板列表
       templates: [],
       currentTemplate: '',
@@ -1392,10 +1417,77 @@ export default {
         this.guideStep[this.currentStep].show = true
       }, 200)
     }
+    
+    // 加载网络认证信息
+    this.loadNetworkCredentials()
+    
     this.getTemplates()
   },
   updated() {},
   methods: {
+    // 录制相关方法
+    onRecordingStarted() {
+      console.log('录制已开始')
+    },
+    onRecordingStopped() {
+      console.log('录制已停止')
+    },
+    onRecordingSaved(result) {
+      console.log('录制已保存:', result)
+      this.$message.success(`录制已保存: ${result.fileName}`)
+    },
+    async stopRecordingIfActive() {
+      // 如果正在录制，则停止录制
+      if (this.$refs.screenRecorder) {
+        await this.$refs.screenRecorder.stopIfRecording()
+      }
+    },
+    
+    // 网络路径认证相关方法
+    loadNetworkCredentials() {
+      try {
+        const stored = localStorage.getItem('networkCredentials')
+        if (stored) {
+          this.networkCredentials = JSON.parse(stored)
+        }
+      } catch (error) {
+        console.error('加载网络认证信息失败:', error)
+      }
+    },
+    
+    // 检查是否有网络路径需要认证
+    checkNetworkPaths() {
+      if (this.$refs.files && this.$refs.files.hasNetworkPaths()) {
+        const networkPaths = this.$refs.files.getNetworkPaths()
+        if (networkPaths.length > 0) {
+          this.networkAuthPaths = networkPaths
+          this.networkAuthVisible = true
+          return true
+        }
+      }
+      return false
+    },
+    
+    // 网络认证确认回调
+    onNetworkAuthConfirm(netInfo) {
+      this.networkCredentials = netInfo
+      this.networkAuthVisible = false
+      
+      // 继续提交流程
+      this.continueSubmit()
+    },
+    
+    // 网络认证取消回调
+    onNetworkAuthCancel() {
+      this.networkAuthVisible = false
+      this.$message.info(this.$t('networkAuth.authCanceled'))
+    },
+    
+    // 继续提交流程
+    continueSubmit() {
+      // 这里继续原来的提交逻辑
+      this.performSubmit()
+    },
     addFolder() {
       this.$refs.files.addFolder()
     },
@@ -2025,7 +2117,21 @@ export default {
       //}, 0);
       //console.log(1);
     },
-    submit() {
+    async submit() {
+      // 停止录制（如果正在录制）
+      await this.stopRecordingIfActive()
+      
+      // 检查是否有网络路径需要认证
+      if (this.checkNetworkPaths()) {
+        return // 等待用户完成网络认证
+      }
+      
+      // 继续提交流程
+      this.performSubmit()
+    },
+    
+    // 实际的提交逻辑
+    async performSubmit() {
       //提交最终的任务请求
       let data = ''
       let pathName
@@ -2201,6 +2307,12 @@ export default {
       if (this.high_setting_form.formatFile != 0) {
         data += '&formatFile=' + this.high_setting_form.formatFile //拷贝前类型
       }
+      
+      // 添加网络路径认证信息
+      if (this.networkCredentials && this.networkCredentials.length > 0) {
+        data += '&net_info=' + JSON.stringify(this.networkCredentials)
+      }
+      
       // if (this.file_form == 0 || this.file_form == 1 || this.file_form == 4 || this.file_form == 2 || this.file_form == 3 || this.file_form == 7) {
 
       // } else {
@@ -2286,6 +2398,11 @@ export default {
         // 使用FormData上传文件
         const formData = new FormData()
         formData.append('file', blob, path.basename(jsonFilePath))
+        
+        // 添加网络路径认证信息
+        if (this.networkCredentials && this.networkCredentials.length > 0) {
+          formData.append('net_info', JSON.stringify(this.networkCredentials))
+        }
         that.submitLoading = true
         // 发送HTTP请求上传文件
         that
@@ -2517,7 +2634,7 @@ export default {
   computed: {
     file_percent() {
       let t = (this.size / (((this.size_form * 1000) / 1.024 / 1.024 / 1.024) * 1024 * 1024)) * 100
-      return t > 100 ? 100.1 : t
+      return t ? t > 100 ? 100.1 : t : 0
     },
     print_op() {
       return [

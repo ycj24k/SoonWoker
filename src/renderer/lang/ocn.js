@@ -17,7 +17,7 @@ export default {
     login:"登入",
     fingerLogin:"使用指紋登入",
     title1:"CARDSOON USB存儲卡",
-    title2:"自動拷貝列印系統V3.0",
+    title2:"自動拷貝列印系統V3.1",
     successLogin:"登入成功! ",
     errorFingerlogin:"登入失敗,請重試指紋! ",
     errorLogin:"登入失敗,請檢查帳號密碼! ",

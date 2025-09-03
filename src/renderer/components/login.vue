@@ -210,6 +210,7 @@ export default {
     },
     onSubmituser() {
       if (this.ruleForm.name == '1') {
+        this.setStep()
         this.$router.push({
           path: '/main'
         })
@@ -234,95 +235,7 @@ export default {
                 console.log(res.data)
                 localStorage.setItem('loginrole', res.data.resultinfo.userRole)
                 localStorage.setItem('loginname', res.data.resultinfo.userName)
-                const guideStep = [
-                  {
-                    show: false,
-                    placement: 'right',
-                    step: this.$t('guide.step1'),
-                  },
-                  {
-                    show: false,
-                    placement: 'right',
-                    step: this.$t('guide.step2'),
-                  },
-                  {
-                    show: false,
-                    placement: 'right',
-                    step: this.$t('guide.step3'),
-                  },
-                  {
-                    show: false,
-                    placement: 'left',
-                    step: this.$t('guide.step4'),
-                  },
-                  {
-                    show: false,
-                    placement: 'bottom',
-                    step: this.$t('guide.step5'),
-                  },
-                  {
-                    show: false,
-                    placement: 'bottom',
-                    step: this.$t('guide.step6'),
-                  },
-                  {
-                    show: false,
-                    placement: 'top',
-                    step: this.$t('guide.step7'),
-                  },
-                  {
-                    show: false,
-                    placement: 'right',
-                    step: this.$t('guide.step8'),
-                  },
-                  {
-                    show: false,
-                    placement: 'bottom',
-                    step: this.$t('guide.step9'),
-                  },
-                  {
-                    show: false,
-                    placement: 'bottom',
-                    step: this.$t('guide.step10'),
-                  },
-                  {
-                    show: false,
-                    placement: 'right',
-                    step: this.$t('guide.step11'),
-                  },
-                  {
-                    show: false,
-                    placement: 'right',
-                    step: this.$t('guide.step12'),
-                  },
-                  {
-                    show: false,
-                    placement: 'left',
-                    step: this.$t('guide.step13'),
-                  },
-                  {
-                    show: false,
-                    placement: 'bottom',
-                    step: this.$t('guide.step14'),
-                  },
-                  {
-                    show: false,
-                    placement: 'top',
-                    step: this.$t('guide.step15'),
-                  },
-                  {
-                    show: false,
-                    placement: 'top',
-                    step: this.$t('guide.step16'),
-                  },
-                  {
-                    show: false,
-                    placement: 'top',
-                    step: this.$t('guide.step17'),
-                  },
-                ]
-                localStorage.setItem('guideStep', JSON.stringify(guideStep))
-                localStorage.setItem('currentStep', 0)
+                this.setStep()
                 this.$router.push({
                   path: '/main'
                 })
@@ -345,6 +258,97 @@ export default {
           console.log('error user!!')
         }
       })
+    },
+    setStep() {
+      const guideStep = [
+        {
+          show: false,
+          placement: 'right',
+          step: this.$t('guide.step1'),
+        },
+        {
+          show: false,
+          placement: 'right',
+          step: this.$t('guide.step2'),
+        },
+        {
+          show: false,
+          placement: 'right',
+          step: this.$t('guide.step3'),
+        },
+        {
+          show: false,
+          placement: 'left',
+          step: this.$t('guide.step4'),
+        },
+        {
+          show: false,
+          placement: 'bottom',
+          step: this.$t('guide.step5'),
+        },
+        {
+          show: false,
+          placement: 'bottom',
+          step: this.$t('guide.step6'),
+        },
+        {
+          show: false,
+          placement: 'top',
+          step: this.$t('guide.step7'),
+        },
+        {
+          show: false,
+          placement: 'right',
+          step: this.$t('guide.step8'),
+        },
+        {
+          show: false,
+          placement: 'bottom',
+          step: this.$t('guide.step9'),
+        },
+        {
+          show: false,
+          placement: 'bottom',
+          step: this.$t('guide.step10'),
+        },
+        {
+          show: false,
+          placement: 'right',
+          step: this.$t('guide.step11'),
+        },
+        {
+          show: false,
+          placement: 'right',
+          step: this.$t('guide.step12'),
+        },
+        {
+          show: false,
+          placement: 'left',
+          step: this.$t('guide.step13'),
+        },
+        {
+          show: false,
+          placement: 'bottom',
+          step: this.$t('guide.step14'),
+        },
+        {
+          show: false,
+          placement: 'top',
+          step: this.$t('guide.step15'),
+        },
+        {
+          show: false,
+          placement: 'top',
+          step: this.$t('guide.step16'),
+        },
+        {
+          show: false,
+          placement: 'top',
+          step: this.$t('guide.step17'),
+        },
+      ]
+      localStorage.setItem('guideStep', JSON.stringify(guideStep))
+      localStorage.setItem('currentStep', 0)
     },
     // 监听回车键执行事件
     keyDown(e) {

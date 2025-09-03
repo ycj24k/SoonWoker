@@ -1,8 +1,11 @@
 const { Menu, app, BrowserWindow } = require("electron");
-import "../renderer/store";
+// Note: Store should be handled in renderer process, not main
+// import "../renderer/store";
 const fs = require('fs');
 const child_process = require('child_process');
 const path = require('path')
+// 导入录制器模块（设置全局变量）
+require('./recorder');
 // require("./fingerprint/win");
 let root = "";
 if (process.env.NODE_ENV !== "development") {
@@ -49,7 +52,7 @@ function createWindow() {
     height: 800,
     useContentSize: true,
     width: 1280,
-    title: "卡树自动拷贝打印系统 V3.0",
+    title: "卡树自动拷贝打印系统 V3.1",
     icon: "static/images/logo64.ico", // sets window icon
     webPreferences: {
       nodeIntegration: true,
@@ -65,6 +68,7 @@ function createWindow() {
   //mainWindow.webContents.openDevTools({mode:'bottom'});
   require("@electron/remote/main").initialize();
   require("@electron/remote/main").enable(mainWindow.webContents);
+  global.setMainWindow(mainWindow);
   mainWindow.loadURL(winURL);
 
   mainWindow.on("closed", () => {

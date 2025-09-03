@@ -61,6 +61,32 @@ import archiverdialog from "./archiverdialog";
 import { calcSize, getFileName, isFolder } from "./calc";
 import { copy } from "./copy";
 import { zip } from "./archiver";
+
+// 网络路径检测工具函数
+const isNetworkPath = (path) => {
+  // 检测是否为网络路径
+  // Windows 网络路径: \\hostname\path 或 \\IP\path
+  // Unix 网络路径: //hostname/path 或 //IP/path
+  return path.startsWith('\\\\') || path.startsWith('//') || 
+         (path.includes(':') && !path.includes('\\') && !path.includes('/'));
+};
+
+const extractHostName = (path) => {
+  if (path.startsWith('\\\\')) {
+    // Windows 网络路径 \\hostname\path
+    const parts = path.substring(2).split('\\')
+    return parts[0]
+  } else if (path.startsWith('//')) {
+    // Unix 网络路径 //hostname/path
+    const parts = path.substring(2).split('/')
+    return parts[0]
+  } else if (path.includes(':')) {
+    // 可能包含 IP 地址
+    const match = path.match(/^([^\\\/:]+)/)
+    return match ? match[1] : 'unknown'
+  }
+  return 'unknown'
+};
 export default {
   name: "Files",
   props: {
@@ -96,6 +122,7 @@ export default {
       isCopy: false,
       isSucess: true,
       copyPath: "",
+      networkPaths: [], // 存储检测到的网络路径
     };
   },
   mounted() {
@@ -132,6 +159,12 @@ export default {
           // 是文件夹
           this.sizeChange(f.size);
         }
+        
+        // 检测是否为网络路径
+        if (isNetworkPath(f.path)) {
+          this.addNetworkPath(f.path);
+        }
+        
         return true;
       } else {
         //有了，不用加入
@@ -145,6 +178,7 @@ export default {
           properties: ["multiSelections"],
         })
         .then(async (res) => {
+          console.log(res)
           for (const item of res.filePaths) {
             await fs.stat(item, function (err, res) {
               if (err) {
@@ -167,6 +201,7 @@ export default {
           properties: ["openDirectory", "multiSelections"],
         })
         .then((res) => {
+          console.log(res)
           for (const item of res.filePaths) {
             const result = _this.insertList({
               name: getFileName(item),
@@ -309,6 +344,62 @@ export default {
     getLists() {
       return this.filesList;
     },
+    
+    // 添加网络路径到列表（按主机去重，仅认证根目录，如 \\\\NAS）
+    addNetworkPath(path) {
+      const hostName = extractHostName(path);
+      const existingIndex = this.networkPaths.findIndex(p => p.hostName === hostName);
+
+      if (existingIndex === -1) {
+        // 尝试从本地存储获取已保存的认证信息
+        let userName = '';
+        let password = '';
+
+        try {
+          const stored = localStorage.getItem('networkCredentials');
+          if (stored) {
+            const credentials = JSON.parse(stored);
+            if (credentials[hostName]) {
+              userName = credentials[hostName].userName;
+              password = credentials[hostName].password;
+            }
+          }
+        } catch (error) {
+          console.log('无法获取已保存的认证信息');
+        }
+
+        // 仅保存根路径用于展示与认证
+        const rootPath = `\\\\${hostName}`;
+        this.networkPaths.push({
+          path: rootPath,
+          hostName: hostName,
+          userName: userName,
+          password: password
+        });
+      }
+    },
+    
+    // 获取网络路径列表（按主机去重，返回根路径）
+    getNetworkPaths() {
+      const uniqueByHost = {};
+      for (const item of this.networkPaths) {
+        if (!uniqueByHost[item.hostName]) {
+          uniqueByHost[item.hostName] = {
+            path: `\\\\${item.hostName}`,
+            hostName: item.hostName,
+            userName: item.userName || '',
+            password: item.password || ''
+          };
+        }
+      }
+      return Object.values(uniqueByHost);
+    },
+    
+    // 检查是否有网络路径
+    hasNetworkPaths() {
+      return this.networkPaths.length > 0;
+    },
+    
     haveFolderIsCalc() {},
   },
   computed: {},

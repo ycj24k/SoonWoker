@@ -1637,7 +1637,7 @@ export default {
         (this.size /
           (((this.size_form * 1000) / 1.024 / 1.024 / 1.024) * 1024 * 1024)) *
         100;
-      return t > 100 ? 100.1 : t;
+      return t ? t > 100 ? 100.1 : t : 0
     },
     print_op() {
       return [

@@ -1,4 +1,26 @@
 export default {
+          recorder: {
+          startRecording: "开始录制",
+          stopRecording: "停止录制",
+          recordingStarted: "开始录制屏幕",
+          recordingStopped: "录制已停止",
+          savedSuccess: "录制已保存",
+          startFailed: "启动录制失败",
+          stopFailed: "停止录制失败",
+          saveFailed: "保存录制失败"
+        },
+        networkAuth: {
+          title: "网络路径认证",
+          description: "检测到以下网络路径，请输入对应的用户名和密码：",
+          pathLabel: "网络路径:",
+          userName: "用户名",
+          password: "密码",
+          confirm: "确认",
+          cancel: "取消",
+          authRequired: "请填写所有网络路径的用户名和密码",
+          authSuccess: "网络认证信息已保存",
+          authCanceled: "已取消网络路径认证"
+        },
   finger: {
     intTips: "指纹模块正在初始化",
     errorInttips: "指纹模块初始化失败",
@@ -18,7 +40,7 @@ export default {
     login: "登录",
     fingerLogin: "使用指纹登录",
     title1: "CARDSOON USB存储卡",
-    title2: "自动拷贝打印系统 V3.0",
+    title2: "自动拷贝打印系统 V3.1",
     successLogin: "登录成功!",
     errorFingerlogin: "登录失败，请重试指纹!",
     errorLogin: "登录失败，请检查账号密码!",

@@ -1,4 +1,26 @@
 export default {
+          recorder: {
+          startRecording: "Start Recording",
+          stopRecording: "Stop Recording",
+          recordingStarted: "Screen recording started",
+          recordingStopped: "Recording stopped",
+          savedSuccess: "Recording saved",
+          startFailed: "Failed to start recording",
+          stopFailed: "Failed to stop recording",
+          saveFailed: "Failed to save recording"
+        },
+        networkAuth: {
+          title: "Network Path Authentication",
+          description: "The following network paths were detected. Please enter the corresponding username and password:",
+          pathLabel: "Network Path:",
+          userName: "Username",
+          password: "Password",
+          confirm: "Confirm",
+          cancel: "Cancel",
+          authRequired: "Please fill in username and password for all network paths",
+          authSuccess: "Network authentication information saved",
+          authCanceled: "Network path authentication canceled"
+        },
   finger: {
     intTips: "The fingerprint module is initializing",
     errorInttips: "Fingerprint module initialization fail",

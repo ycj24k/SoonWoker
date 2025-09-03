@@ -251,7 +251,7 @@ export default {
         StopOnFailure: "false"
         SystemSn: "830001"
         TaskDir: "C:\\PrintTasks"
-        Version: "V3.0"
+        Version: "V3.1"
 
     iniparser.parse("F:\\controll\\config.ini", function (err, data) {
       console.log(err);

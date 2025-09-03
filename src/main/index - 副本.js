@@ -43,7 +43,7 @@ function createWindow() {
     height: 800,
     useContentSize: true,
     width: 1280,
-    title: "卡树自动拷贝打印系统 V3.0",
+    title: "卡树自动拷贝打印系统 V3.1",
     icon: "static/images/logo64.ico", // sets window icon
     webPreferences: {
       nodeIntegration: true,
