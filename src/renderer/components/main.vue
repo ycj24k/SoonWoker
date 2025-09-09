@@ -409,7 +409,7 @@
                   prop="status"
                   :label="$t('main.tableState')"
                   min-width="80">
-                  <template slot-scope="scope">{{ $t('main.tableOnline') }}</template>
+                  <template slot-scope="{}">{{ $t('main.tableOnline') }}</template>
                 </el-table-column>
                 <el-table-column
                   prop="SerialNo"
@@ -541,7 +541,9 @@
                       style="width: 100%"
                       size="mini"
                       :empty-text="$t('index.nodata')"
-                      row-class-name="rowclass">
+                      row-class-name="rowclass"
+                      :row-key="row => row.JobID || row.AssUuid"
+                      :tree-props="{ children: 'children' }">
                       <el-table-column
                         label="#"
                         width="50">
@@ -553,6 +555,10 @@
                         prop="jId"
                         :label="$t('index.wordID')"
                         min-width="85">
+                        <template slot-scope="scope">
+                          <span v-if="!scope.row.AssUuid">{{ scope.row.jId }}</span>
+                          <span v-else>{{ (scope.row.ParentJobID || '') | shortJobId }}</span>
+                        </template>
                       </el-table-column>
                       <el-table-column
                         prop="DataSource"
@@ -563,20 +569,23 @@
                         :label="$t('index.wordSpace')"
                         min-width="45">
                         <template slot-scope="scope">
-                          {{ getPrintName(scope.row.PrinterID, true) }}
+                          <span v-if="!scope.row.AssUuid">{{ getPrintName(scope.row.PrinterID, true) }}</span>
+                          <span v-else>{{ getPrintName(scope.row.ParentPrinterID || scope.row.PrinterID, true) }}</span>
                         </template>
                       </el-table-column>
                       <el-table-column
                         :label="$t('main.USBType')"
                         min-width="55">
                         <template slot-scope="scope">
-                          {{ scope.row.PrinterType }}
+                          {{ !scope.row.AssUuid ? scope.row.PrinterType : (scope.row.ParentPrinterType || scope.row.PrinterType) }}
                         </template>
                       </el-table-column>
                       <el-table-column
                         min-width="60"
-                        prop="TaskCapacity"
                         :label="$t('main.TaskCapacity')">
+                        <template slot-scope="scope">
+                          {{ !scope.row.AssUuid ? scope.row.TaskCapacity : (scope.row.ParentTaskCapacity || '') }}
+                        </template>
                       </el-table-column>
                       <el-table-column
                         v-if="false"
@@ -584,9 +593,11 @@
                         :label="$t('main.taskFile')">
                       </el-table-column>
                       <el-table-column
-                        prop="CreateTime"
                         :label="$t('index.createTime')"
                         min-width="75">
+                        <template slot-scope="scope">
+                          {{ !scope.row.AssUuid ? scope.row.CreateTime : (scope.row.StartTime || '') }}
+                        </template>
                       </el-table-column>
                       <el-table-column
                         v-if="false"
@@ -599,48 +610,64 @@
                         :filter-method="filterHandler">
                       </el-table-column>
                       <el-table-column
-                        prop="FinishTime"
                         :label="$t('index.finishedTime')"
                         min-width="75">
+                        <template slot-scope="scope">
+                          {{ !scope.row.AssUuid ? scope.row.FinishTime : (scope.row.FinishTime || '') }}
+                        </template>
                       </el-table-column>
                       <el-table-column
-                        prop="JobCompletion"
                         min-width="40"
                         :label="$t('index.finishedNumber')">
+                        <template slot-scope="scope">
+                          <span v-if="!scope.row.AssUuid">{{ scope.row.JobCompletion }}</span>
+                          <span v-else>-</span>
+                        </template>
                       </el-table-column>
                       <el-table-column
                         :label="$t('index.state')"
-                        prop="JobStatus"
                         width="135">
                         <template slot-scope="scope">
-                          <el-dropdown
-                            trigger="click"
-                            @command="(e) => handleTaskCommand(e, scope.row.JobID)"
-                            :disabled="scope.row.JobStatus != 'Fail'">
-                            <span
-                              class="el-dropdown-link"
-                              style="color: #000; font-size: 12px">
-                              {{ jobState(scope.row.JobStatus) }}<b v-if="scope.row.JobStatus === 'Copying'" style="margin-left: 3px;">{{ scope.row.CopySpeed ? Math.ceil(parseFloat(scope.row.CopySpeed)*10)/10 : '0.0' }}MB/s</b>
-                              <i
-                                class="el-icon-arrow-down el-icon--right"
-                                v-if="scope.row.JobStatus == 'Fail'"></i>
-                            </span>
-                            <el-dropdown-menu slot="dropdown">
-                              <el-dropdown-item command="refresh">
-                                <span style="color: #000; font-size: 12px">{{ $t('main.commandRefresh') }}</span>
-                              </el-dropdown-item>
-                              <el-dropdown-item command="delete">
-                                <span style="color: #000; font-size: 12px">{{ $t('main.commandDelete') }}</span>
-                              </el-dropdown-item>
-                            </el-dropdown-menu>
-                          </el-dropdown>
-                          <el-progress
-                            :color="customColors"
-                            :width="45"
-                            define-back-color="#ebeef5"
-                            :stroke-width="3"
-                            :percentage="parseFloat(scope.row.TaskPercentage.replace(`%`, ``))"
-                            v-if="scope.row.JobStatus == `Copying`"></el-progress>
+                          <template v-if="!scope.row.AssUuid">
+                            <el-dropdown
+                              trigger="click"
+                              @command="(e) => handleTaskCommand(e, scope.row.JobID)"
+                              :disabled="scope.row.JobStatus != 'Fail'">
+                              <span
+                                class="el-dropdown-link"
+                                style="color: #000; font-size: 12px">
+                                {{ jobState(scope.row.JobStatus) }}<b v-if="scope.row.JobStatus === 'Copying'" style="margin-left: 3px;">{{ scope.row.CopySpeed ? Math.ceil(parseFloat(scope.row.CopySpeed)*10)/10 : '0.0' }}MB/s</b>
+                                <i
+                                  class="el-icon-arrow-down el-icon--right"
+                                  v-if="scope.row.JobStatus == 'Fail'"></i>
+                              </span>
+                              <el-dropdown-menu slot="dropdown">
+                                <el-dropdown-item command="refresh">
+                                  <span style="color: #000; font-size: 12px">{{ $t('main.commandRefresh') }}</span>
+                                </el-dropdown-item>
+                                <el-dropdown-item command="delete">
+                                  <span style="color: #000; font-size: 12px">{{ $t('main.commandDelete') }}</span>
+                                </el-dropdown-item>
+                              </el-dropdown-menu>
+                            </el-dropdown>
+                            <el-progress
+                              :color="customColors"
+                              :width="45"
+                              define-back-color="#ebeef5"
+                              :stroke-width="3"
+                              :percentage="parseFloat((scope.row.TaskPercentage || '0').replace(`%`, ``))"
+                              v-if="scope.row.JobStatus == `Copying`"></el-progress>
+                          </template>
+                          <template v-else>
+                            {{ jobState(scope.row.TaskStatus) }}
+                            <el-progress
+                              :color="customColors"
+                              :width="45"
+                              define-back-color="#ebeef5"
+                              :stroke-width="3"
+                              :percentage="parseFloat((scope.row.TaskPercentage || '0').replace(`%`, ``))"
+                              v-if="scope.row.TaskStatus == `Copying`"></el-progress>
+                          </template>
                         </template>
                       </el-table-column>
                     </el-table>
@@ -823,6 +850,12 @@ export default {
     worknet,
     warnCard,
     sFooter
+  },
+  filters: {
+    shortJobId(v) {
+      if (!v) return ''
+      return String(v).split('-')[0]
+    }
   },
   data() {
     return {
@@ -1265,13 +1298,31 @@ export default {
           this.state = true
           let tasks = [...this.tasks]
           this.tasks = []
-          for (let item of res.data.unfinishedTasks) {
-            item.jId = item.JobID.split('-')[0] //+ "...";
-            this.tasks.push(item)
+          const normalize = (task) => {
+            const jId = (task.JobID || '').split('-')[0]
+            const parentCommon = {
+              jId,
+              ParentJobID: task.JobID,
+              ParentPrinterID: task.PrinterID,
+              ParentPrinterType: task.PrinterType,
+              ParentTaskCapacity: task.TaskCapacity
+            }
+            const children = Array.isArray(task.AssTask) ? task.AssTask.map((child) => ({
+              ...child,
+              ...parentCommon
+            })) : []
+            return {
+              ...task,
+              jId,
+              children
+            }
           }
-          for (let item of res.data.finishedTasks) {
-            item.jId = item.JobID.split('-')[0] //+ "...";
-            this.tasks.push(item)
+
+          for (let item of (res.data.unfinishedTasks || [])) {
+            this.tasks.push(normalize(item))
+          }
+          for (let item of (res.data.finishedTasks || [])) {
+            this.tasks.push(normalize(item))
           }
           let total1 = 0
           let total2 = 0
@@ -1681,6 +1732,19 @@ export default {
       }
       this.isNew = true
       this.dialogVisible = true
+      // 新建任务时重置文件列表与网络认证状态，避免上一次残留导致卡顿
+      this.$nextTick(() => {
+        const workRef = this.$refs.work
+        if (workRef && workRef.$refs && workRef.$refs.files && workRef.$refs.files.reset) {
+          workRef.$refs.files.reset()
+        }
+        if (workRef) {
+          workRef.networkAuthVisible = false
+          workRef.networkAuthPaths = []
+          workRef.networkCredentials = {}
+          workRef.submitLoading = false
+        }
+      })
     },
     newNetWork() {
       //this.isNew = true;

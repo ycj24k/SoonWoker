@@ -193,18 +193,7 @@
                   </el-select>
                 </el-form-item>
 
-                <el-form-item :label="$t('work.formatFile')">
-                  <el-select
-                    :placeholder="$t('work.pleaseSelect')"
-                    v-model="high_setting_form.formatFile">
-                    <el-option
-                      v-for="item in high_setting.formatFile"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value">
-                    </el-option>
-                  </el-select>
-                </el-form-item>
+                <!-- 移除不需要的U盘格式列 -->
                 <el-form-item :label="$t('work.hash')">
                   <el-switch v-model="high_setting_form.s1"> </el-switch>
                 </el-form-item>
@@ -257,7 +246,7 @@
       @recording-started="onRecordingStarted"
       @recording-stopped="onRecordingStopped"
       @recording-saved="onRecordingSaved"
-      style="margin-left: 10px; display: inline-block;"
+      style="margin-right: 10px; display: inline-block;"
     />
     
     <!-- 网络路径认证对话框 -->
@@ -269,210 +258,7 @@
     />
         </div>
       </div>
-      <el-row
-        :gutter="20"
-        v-if="0">
-        <el-col :span="6">
-          <el-row :gutter="0">
-            <el-col :span="8">
-              <div class="grid-content bg-purple">
-                <span style="font-size: 16px; line-height: 32px; float: left">
-                  {{ $t('work.size') }}
-                </span>
-              </div>
-            </el-col>
-            <el-col :span="14">
-              <div class="grid-content bg-purple">
-                <el-select
-                  :placeholder="$t('work.pleaseSelect')"
-                  style="width: 160px"
-                  v-model="size_form">
-                  <el-option
-                    v-for="item in size_type"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value"
-                    :disabled="filterPassedType.indexOf(item.value) == -1">
-                  </el-option>
-                </el-select>
-              </div>
-            </el-col>
-          </el-row>
-          <!--
-					<el-input v-model="juanbiao_form" :placeholder="$t('work.pleaseInput')" style="width:280px;float:left">
-						<template slot="prepend">
-							{{$t("work.sign")}}
-						</template>
-					</el-input>
-                    -->
-        </el-col>
-        <el-col :span="6">
-          <el-row :gutter="0">
-            <el-col :span="8">
-              <div class="grid-content bg-purple">
-                <span style="font-size: 16px; line-height: 32px; float: left">
-                  {{ $t('work.content') }}
-                </span>
-              </div>
-            </el-col>
-            <el-col :span="14">
-              <div class="grid-content bg-purple">
-                <el-select
-                  :placeholder="$t('work.pleaseSelect')"
-                  style="float: left; margin-left: 10px"
-                  v-model="file_form">
-                  <el-option
-                    v-for="item in file_type"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value">
-                  </el-option>
-                </el-select>
-              </div>
-            </el-col>
-          </el-row>
-        </el-col>
-        <el-col :span="6">
-          <el-row :gutter="0">
-            <el-col :span="8">
-              <div class="grid-content bg-purple">
-                <span style="font-size: 16px; line-height: 32px">
-                  {{ $t('work.partType') }}
-                </span>
-              </div>
-            </el-col>
-            <el-col :span="14">
-              <div class="grid-content bg-purple">
-                <el-select
-                  :placeholder="$t('work.pleaseSelect')"
-                  v-model="type_form">
-                  <el-option
-                    v-for="item in type"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value"
-                    :disabled="item.disabled">
-                  </el-option>
-                </el-select>
-              </div>
-            </el-col>
-          </el-row>
-        </el-col>
-        <el-col :span="6">
-          <el-popover
-            style="float: right"
-            placement="left"
-            width="600"
-            trigger="click">
-            <div>
-              <el-form
-                :label-position="'right'"
-                label-width="250px">
-                <el-form-item :label="$t('work.better')">
-                  <el-select
-                    :placeholder="$t('work.pleaseSelect')"
-                    v-model="high_setting_form.priority">
-                    <el-option
-                      v-for="item in high_setting.priority"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value">
-                    </el-option>
-                  </el-select>
-                </el-form-item>
-                <!--<el-form-item :label="$t('work.gshType')">
-									<el-select :placeholder="$t('work.pleaseSelect')" v-model="high_setting_form.fileSystem">
-										<el-option v-for="item in high_setting.fileSystem" :key="item.value" :label="item.label"
-										:value="item.value">
-										</el-option>
-									</el-select>
-								</el-form-item>-->
-                <el-form-item :label="$t('work.startWorkSpace')">
-                  <el-select
-                    :placeholder="$t('work.pleaseSelect')"
-                    v-model="high_setting_form.target_work">
-                    <el-option
-                      v-for="item in high_setting.target_work"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value">
-                    </el-option>
-                  </el-select>
-                </el-form-item>
-                <el-form-item :label="$t('work.ribbonType')">
-                  <el-select
-                    :placeholder="$t('work.pleaseSelect')"
-                    v-model="high_setting_form.color_type">
-                    <el-option
-                      v-for="item in high_setting.color_type"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value">
-                    </el-option>
-                  </el-select>
-                </el-form-item>
-
-                <el-form-item :label="$t('work.formatFile')">
-                  <el-select
-                    :placeholder="$t('work.pleaseSelect')"
-                    v-model="high_setting_form.formatFile">
-                    <el-option
-                      v-for="item in high_setting.formatFile"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value">
-                    </el-option>
-                  </el-select>
-                </el-form-item>
-                <el-form-item :label="$t('work.hash')">
-                  <el-switch v-model="high_setting_form.s1"> </el-switch>
-                </el-form-item>
-                <el-form-item :label="$t('work.md5')">
-                  <el-switch v-model="high_setting_form.s2"> </el-switch>
-                </el-form-item>
-                <el-form-item :label="$t('work.fail')">
-                  <el-switch v-model="high_setting_form.s3"> </el-switch>
-                </el-form-item>
-
-                <el-form-item :label="$t('work.spanUSBcard')">
-                  <el-switch v-model="high_setting_form.Span_USBcard"> </el-switch>
-                </el-form-item>
-                <!--<el-form-item :label="$t('work.disk')">
-									<el-switch v-model="high_setting_form.s4">
-									</el-switch>
-								</el-form-item>
-								<el-form-item :label="$t('work.bitlocker')">
-									<el-switch v-model="high_setting_form.s5">
-									</el-switch>
-								</el-form-item>-->
-
-                <!-- <el-form-item :label="$t('work.localFiles')"> -->
-                <!-- <el-switch v-model="high_setting_form.localfiles"> -->
-                <!-- </el-switch> -->
-                <!-- </el-form-item> -->
-              </el-form>
-              <!--<el-descriptions :column="2" v-if="high_setting_form.s5">
-								<el-descriptions-item :label="$t('work.password')">
-									<el-input placeholder="$t('work.pleasePassword')" v-model="high_setting_form.pass" show-password
-									size="mini">
-									</el-input>
-								</el-descriptions-item>
-								<el-descriptions-item :label="$t('work.comfirm')">
-									<el-input placeholder="$t('work.pleasePassword')" v-model="high_setting_form.repass" show-password
-									size="mini">
-									</el-input>
-								</el-descriptions-item>
-							</el-descriptions>-->
-            </div>
-            <el-button
-              slot="reference"
-              size="medium"
-              style="height: 32px; padding: 0 15px; line-height: 32px">
-              {{ $t('work.senior') }}
-            </el-button>
-          </el-popover>
-        </el-col>
-      </el-row>
+      <!-- 删除无效布局：v-if=0 -->
     </div>
     <!-- <el-row
       :gutter="20"
@@ -650,6 +436,7 @@
               :onSizechange="sizeChange"
               :complete="upload_over"
               :saveWorkList="saveWorkList"
+              @network-paths-changed="onNetworkPathsChanged"
               ><el-progress
                 :text-inside="true"
                 :percentage="file_percent"
@@ -1295,7 +1082,7 @@ export default {
       //    value: 4,
       //    label: this.$t("work.forbidCopyU")
       //}],
-      size_form: null,
+      size_form: 4,
       type_form: 0,
       file_form: 0,
       number: 1,
@@ -1466,6 +1253,16 @@ export default {
         }
       }
       return false
+    },
+
+    // 文件列表网络路径变化时触发，若为空则关闭弹窗
+    onNetworkPathsChanged(paths) {
+      if (!paths || paths.length === 0) {
+        this.networkAuthVisible = false
+        this.networkAuthPaths = []
+      } else {
+        this.networkAuthPaths = paths
+      }
     },
     
     // 网络认证确认回调

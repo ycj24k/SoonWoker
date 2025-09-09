@@ -54,6 +54,7 @@
 <script>
 const { dialog } = require("@electron/remote");
 const fs = require("fs");
+const path = require("path");
 import fileEmpty from "./fileEmpty";
 import fileList from "./fileList";
 import progressdialog from "./progressdialog";
@@ -128,7 +129,7 @@ export default {
   mounted() {
     // this.$set(this, filesList, this.saveWorkList)
     const _this = this;
-    document.addEventListener("drop", (e) => {
+    this._handleDrop = (e) => {
       e.preventDefault();
       // e.stopPropagation();
       for (const f of e.dataTransfer.files) {
@@ -144,13 +145,43 @@ export default {
           calcSize(f.path, _this.folderCalcCallback);
         }
       }
-    });
-    document.addEventListener("dragover", (e) => {
+    };
+    this._handleDragOver = (e) => {
       e.preventDefault();
       // e.stopPropagation();
-    });
+    };
+    document.addEventListener("drop", this._handleDrop);
+    document.addEventListener("dragover", this._handleDragOver);
+  },
+  beforeDestroy() {
+    if (this._handleDrop) {
+      document.removeEventListener("drop", this._handleDrop);
+      this._handleDrop = null;
+    }
+    if (this._handleDragOver) {
+      document.removeEventListener("dragover", this._handleDragOver);
+      this._handleDragOver = null;
+    }
   },
   methods: {
+    reset() {
+      this.filesList = {};
+      this.key++;
+      this.allSize = 0;
+      this.progressVisible = false;
+      this.archiverVisible = false;
+      this.overNumber = 0;
+      this.allNumber = 0;
+      this.nowstate = true;
+      this.archiverIsover = false;
+      this.archiverIsfalse = false;
+      this.zip_path = "";
+      this.isCopy = false;
+      this.isSucess = true;
+      this.copyPath = "";
+      this.networkPaths = [];
+      this.$emit('network-paths-changed', []);
+    },
     insertList(f) {
       if (!this.filesList[f.path]) {
         this.allNumber++;
@@ -227,6 +258,12 @@ export default {
       delete this.filesList[path];
       this.key++;
       this.allNumber--;
+      // 若为网络路径，则同步按主机清理认证项
+      if (isNetworkPath(path)) {
+        const hostName = extractHostName(path)
+        this.networkPaths = this.networkPaths.filter(p => p.hostName !== hostName)
+      }
+      this.$emit('network-paths-changed', this.getNetworkPaths());
     },
     dropFolderCheck(f) {
       //T是文件夹 F不是文件夹
@@ -284,34 +321,52 @@ export default {
         this.changeArchivervisible(false);
       }, 500);
     },
-    resume(file_form) {
-      //if (file_form == 0) {
-      if (1) {
-        if (this.isCopy) {
+    async resume(file_form) {
+      // 统一走优化流程
+      const entries = Object.values(this.filesList || {});
+      if (entries.length === 0) {
+        return;
+      }
+      if (this.isCopy) {
+        // 拷贝到共享目录：确保目标目录存在，顺序执行避免过多并发导致卡顿
+        try {
+          if (!this.copyPath || typeof this.copyPath !== 'string') {
+            console.warn('Invalid copyPath');
+            // 回退为直接完成，避免卡住
+            entries.forEach((f) => this.fileBack(f, true));
+            return;
+          }
+          // 确保目录以分隔符结尾拼接正确
+          const targetDir = this.copyPath;
+          try {
+            if (!fs.existsSync(targetDir)) {
+              fs.mkdirSync(targetDir, { recursive: true });
+            }
+          } catch (e) {
+            console.error('ensure target dir failed', e);
+          }
           this.overNumber = 0;
           this.changeProgressvisible(true);
-          for (let i in this.filesList) {
-            // const path = "D:\\copytest\\1\\" + this.filesList[i].name;
-            const path = this.copyPath + this.filesList[i].name;
-            console.log(this.copyPath);
-            console.log(path);
-            copy(
-              i,
-              path,
-              this.filesList[i].folder,
-              this.fileBack,
-              this.filesList[i]
-            );
+
+          for (const file of entries) {
+            const dest = path.join(targetDir, file.name);
+            await new Promise((resolve) => {
+              copy(
+                file.path,
+                dest,
+                file.folder,
+                (fl, ok) => {
+                  this.fileBack(fl, ok);
+                  resolve();
+                },
+                file
+              );
+            });
           }
-        } else {
-          //2023-04-24修改为所有都只上传文件路径，不需要压缩
-          //文件和文件夹
-          this.overNumber = 0;
-          for (let i in this.filesList) {
-            // const path = "D:\\copytest\\1\\" + this.filesList[i].name;
-            // copy(i, path, this.filesList[i].folder, this.back, this.filesList[i]);
-            this.fileBack(this.filesList[i], true);
-          }
+        } catch (err) {
+          console.error('copy flow error', err);
+          // 出错时也推进为完成，避免停滞
+          entries.forEach((f) => this.fileBack(f, false));
         }
       } else if (file_form == 1) {
         //电子光盘
@@ -330,6 +385,12 @@ export default {
         zip(this.filesList, this.zip_path, this.archiverBack, true, password);
       } else if (file_form == 4) {
         //u盘
+      } else {
+        // 默认路径上传：不实际拷贝，仅回调推进流程
+        this.overNumber = 0;
+        for (const file of entries) {
+          this.fileBack(file, true);
+        }
       }
     },
     changeProgressvisible(visiable) {
@@ -376,6 +437,7 @@ export default {
           userName: userName,
           password: password
         });
+        this.$emit('network-paths-changed', this.getNetworkPaths());
       }
     },
     

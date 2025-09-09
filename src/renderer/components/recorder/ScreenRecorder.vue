@@ -4,6 +4,7 @@
       :content="isRecording ? $t('recorder.stopRecording') : $t('recorder.startRecording')" 
       placement="top">
       <el-button
+        size="medium"
         :type="isRecording ? 'danger' : 'primary'"
         :icon="isRecording ? 'el-icon-video-pause' : 'el-icon-video-camera'"
         circle
