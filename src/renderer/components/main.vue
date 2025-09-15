@@ -223,8 +223,7 @@
                     :class="{ guide_body: beginStep && currentStep == 7 }">
                     <el-button
                       type="primary"
-                      @click="newWork"
-                      :disabled="infoData.length == 0 && state == false">
+                      @click="newWork">
                       {{ $t('index.newWork') }}
                     </el-button>
                   </div>
@@ -427,16 +426,13 @@
                   min-width="100">
                   <template slot-scope="scope">
                     <el-progress
+                      class="ribbon-progress"
                       :color="customColors"
-                      :width="45"
-                      define-back-color="#ebeef5"
-                      :format="() => scope.row.RibbonAmount"
+                      :width="60"
+                      define-back-color="#dfe4ed"
+                      :format="() => String(scope.row.RibbonAmount || 0)"
                       :stroke-width="3"
-                      :percentage="
-                        scope.row.RibbonAmount == undefined || scope.row.RibbonAmount == '0'
-                          ? 0
-                          : parseFloat(((scope.row.RibbonAmount / getRibbonAmount(scope.row.ModeName, scope.row.RibbonType)) * 100).toFixed(0))
-                      "></el-progress>
+                      :percentage="safePercent(scope.row.RibbonAmount, getRibbonAmount(scope.row.ModeName, scope.row.RibbonType))"></el-progress>
                   </template>
                 </el-table-column>
                 <el-table-column
@@ -474,17 +470,11 @@
                   :label="$t('main.tablePrinterRemaCapa')"
                   min-width="100">
                   <template slot-scope="scope">
-                    <el-progress
-                      :color="customColors"
-                      :width="45"
-                      define-back-color="#ebeef5"
-                      :format="() => (scope.row.PrinterRemaCapa > 0 ? scope.row.PrinterRemaCapa : 0)"
-                      :stroke-width="3"
-                      :percentage="
-                        scope.row.PrinterRemaCapa == undefined || scope.row.PrinterRemaCapa == '0'
-                          ? 0
-                          : parseFloat((((scope.row.PrinterRemaCapa > 0 ? scope.row.PrinterRemaCapa : 0) / getPrinterRemaCapaAmount(scope.row.ModeName)) * 100).toFixed(0))
-                      "></el-progress>
+                    <EnergyBar
+                      :percent="safePercent((scope.row.PrinterRemaCapa > 0 ? scope.row.PrinterRemaCapa : 0), getPrinterRemaCapaAmount(scope.row.ModeName))"
+                      :segments="(scope.row.ModeName === 'TH80N' ? 6 : 8)"
+                      :showText="true"
+                      :text="String(scope.row.PrinterRemaCapa > 0 ? scope.row.PrinterRemaCapa : 0)" />
                   </template>
                 </el-table-column>
               </el-table>
@@ -541,14 +531,14 @@
                       style="width: 100%"
                       size="mini"
                       :empty-text="$t('index.nodata')"
-                      row-class-name="rowclass"
+                      :row-class-name="rowClassName"
                       :row-key="row => row.JobID || row.AssUuid"
                       :tree-props="{ children: 'children' }">
                       <el-table-column
                         label="#"
                         width="50">
                         <template slot-scope="scope">
-                          {{ scope.$index + 1 }}
+                          <span v-if="!scope.row.AssUuid">{{ parentIndex(scope.row) }}</span>
                         </template>
                       </el-table-column>
                       <el-table-column
@@ -557,13 +547,16 @@
                         min-width="85">
                         <template slot-scope="scope">
                           <span v-if="!scope.row.AssUuid">{{ scope.row.jId }}</span>
-                          <span v-else>{{ (scope.row.ParentJobID || '') | shortJobId }}</span>
+                          <span v-else></span>
                         </template>
                       </el-table-column>
                       <el-table-column
-                        prop="DataSource"
                         :label="$t('index.wordOrigin')"
                         min-width="50">
+                        <template slot-scope="scope">
+                          <span v-if="!scope.row.AssUuid">{{ scope.row.DataSource }}</span>
+                          <span v-else></span>
+                        </template>
                       </el-table-column>
                       <el-table-column
                         :label="$t('index.wordSpace')"
@@ -655,7 +648,7 @@
                               :width="45"
                               define-back-color="#ebeef5"
                               :stroke-width="3"
-                              :percentage="parseFloat((scope.row.TaskPercentage || '0').replace(`%`, ``))"
+                              :percentage="Math.max(0, Math.min(100, Number(String(scope.row.TaskPercentage || '0').replace('%','')) || 0))"
                               v-if="scope.row.JobStatus == `Copying`"></el-progress>
                           </template>
                           <template v-else>
@@ -665,7 +658,7 @@
                               :width="45"
                               define-back-color="#ebeef5"
                               :stroke-width="3"
-                              :percentage="parseFloat((scope.row.TaskPercentage || '0').replace(`%`, ``))"
+                              :percentage="Math.max(0, Math.min(100, Number(String(scope.row.TaskPercentage || '0').replace('%','')) || 0))"
                               v-if="scope.row.TaskStatus == `Copying`"></el-progress>
                           </template>
                         </template>
@@ -842,6 +835,7 @@ import sFooter from './footer.vue'
 import warnCard from './warn-card.vue'
 import N80N from '../assets/80N.png'
 import N800N from '../assets/800N.png'
+import EnergyBar from './EnergyBar.vue'
 
 export default {
   name: 'Main',
@@ -849,7 +843,8 @@ export default {
     work,
     worknet,
     warnCard,
-    sFooter
+    sFooter,
+    EnergyBar
   },
   filters: {
     shortJobId(v) {
@@ -1150,6 +1145,27 @@ export default {
     this.stopTimer()
   },
   methods: {
+    rowClassName({ row }) {
+      // 子任务行更紧凑
+      return row.AssUuid ? 'ass-row' : ''
+    },
+    safePercent(value, total) {
+      const v = Number(value)
+      const t = Number(total)
+      if (!isFinite(v) || !isFinite(t) || t <= 0) return 0
+      const p = (v / t) * 100
+      if (!isFinite(p) || isNaN(p)) return 0
+      return Math.max(0, Math.min(100, Math.round(p)))
+    },
+    parentIndex(row) {
+      // 只对父任务计算序号：按 tasks 顶层数组索引 + 1
+      if (row && !row.AssUuid) {
+        const id = row.JobID
+        const idx = (this.tasks || []).findIndex(t => t.JobID === id)
+        return idx >= 0 ? idx + 1 : ''
+      }
+      return ''
+    },
     initData() {
       this.getData()
       this.getLogData()
@@ -1305,7 +1321,8 @@ export default {
               ParentJobID: task.JobID,
               ParentPrinterID: task.PrinterID,
               ParentPrinterType: task.PrinterType,
-              ParentTaskCapacity: task.TaskCapacity
+              ParentTaskCapacity: task.TaskCapacity,
+              ParentDataSource: task.DataSource
             }
             const children = Array.isArray(task.AssTask) ? task.AssTask.map((child) => ({
               ...child,
@@ -1741,7 +1758,6 @@ export default {
         if (workRef) {
           workRef.networkAuthVisible = false
           workRef.networkAuthPaths = []
-          workRef.networkCredentials = {}
           workRef.submitLoading = false
         }
       })
@@ -1755,10 +1771,12 @@ export default {
       return String.fromCharCode(65 + parseInt(n))
     },
     getPrintName(id, onlyId) {
+      const safeId = (id && typeof id === 'string') ? id : ''
+      const tail = safeId.length >= 5 ? safeId.substr(-5) : safeId || '--'
       if (onlyId === true) {
-        return id.substr(-5)
+        return tail
       }
-      return this.$t('index.wordSpace') + id.substr(-5)
+      return this.$t('index.wordSpace') + tail
     },
     getPrinterRemaCapaAmount(ModeName) {
       // console.log('PrinterRemaCapa', this.ribbonList[ModeName].PrinterRemaCapa)
@@ -2158,6 +2176,30 @@ a {
   }
 }
 
+/* 子任务行紧凑显示 */
+/deep/ .el-table__row.ass-row > td {
+  padding-top: 2px !important;
+  padding-bottom: 2px !important;
+}
+/deep/ .el-table__row.ass-row .cell {
+  line-height: 18px !important;
+}
+/* 去除树结构行默认左侧过大缩进，让箭头与内容更紧凑 */
+/deep/ .el-table__expand-icon {
+  margin-right: 2px;
+}
+/* 缩小树结构图标列宽与缩进 */
+/deep/ .el-table__indent {
+  padding-left: 8px !important;
+}
+/deep/ .el-table__expand-icon > i {
+  font-size: 12px;
+}
+/* 进度条内数字不换行 */
+/deep/ .ribbon-progress .el-progress-bar__innerText {
+  white-space: nowrap;
+}
+
 .user {
   font-size: 15px;
   display: flex;
@@ -2216,6 +2258,38 @@ a {
     background: #99a9bf;
     border-radius: 20px;
   }
+}
+
+/* 色带进度条样式优化 */
+/deep/ .ribbon-progress .el-progress-bar__outer {
+  background: linear-gradient(180deg, #f3f6fa, #e5ebf5);
+  border-radius: 6px;
+  border: 1px solid #cfd6e3;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,.08);
+}
+/deep/ .ribbon-progress .el-progress-bar__inner {
+  border-radius: 6px;
+}
++.ribbon-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 6px;
+  border-radius: 10px;
+  background: rgba(255,255,255,.35);
+  backdrop-filter: blur(3px);
+}
++.ribbon-badge {
+  min-width: 30px;
+  height: 18px;
+  line-height: 18px;
+  padding: 0 8px;
+  border-radius: 9px;
+  background: linear-gradient(145deg, #1f2430, #0e1118);
+  color: #bfe3ff;
+  font-size: 12px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,.15), inset 0 0 8px rgba(120,180,255,.25);
 }
 </style>
 <style>

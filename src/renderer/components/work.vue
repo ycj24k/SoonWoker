@@ -1209,6 +1209,10 @@ export default {
     this.loadNetworkCredentials()
     
     this.getTemplates()
+    // 加载已保存的网络认证，支持二次新建直接使用
+    if (this.loadNetworkCredentials) {
+      this.loadNetworkCredentials()
+    }
   },
   updated() {},
   methods: {
@@ -1244,14 +1248,50 @@ export default {
     
     // 检查是否有网络路径需要认证
     checkNetworkPaths() {
-      if (this.$refs.files && this.$refs.files.hasNetworkPaths()) {
-        const networkPaths = this.$refs.files.getNetworkPaths()
-        if (networkPaths.length > 0) {
-          this.networkAuthPaths = networkPaths
-          this.networkAuthVisible = true
-          return true
+      if (!(this.$refs.files && this.$refs.files.hasNetworkPaths())) {
+        return false
+      }
+      const networkPaths = this.$refs.files.getNetworkPaths() || []
+      if (networkPaths.length === 0) return false
+
+      // 从本地存储的 credentials 中匹配已有主机
+      let stored = {}
+      try {
+        stored = JSON.parse(localStorage.getItem('networkCredentials') || '{}')
+      } catch (e) {
+        stored = {}
+      }
+      const missing = []
+      const prepared = []
+      for (const item of networkPaths) {
+        const host = item.hostName || this.getHostFromPath(item.path) || ''
+        if (host && stored[host] && stored[host].userName && stored[host].password) {
+          prepared.push({
+            host_name: host,
+            user_name: stored[host].userName,
+            password: stored[host].password,
+          })
+        } else {
+          missing.push({ ...item, hostName: host })
         }
       }
+
+      if (missing.length > 0) {
+        // 仅对缺失凭据的主机弹窗
+        this.networkAuthPaths = missing.map(m => ({
+          path: m.path,
+          hostName: m.hostName,
+          userName: '',
+          password: ''
+        }))
+        this.networkAuthVisible = true
+        // 先保存已准备好的，等用户补齐再一起提交
+        this.networkCredentials = prepared
+        return true
+      }
+
+      // 全部已有凭据，直接使用
+      this.networkCredentials = prepared
       return false
     },
 
@@ -2426,6 +2466,20 @@ export default {
     },
     help() {
       ipcRenderer.send('open-help-file')
+    },
+    // 从路径提取主机名（兼容 \\host\path 与 //host/path）
+    getHostFromPath(p) {
+      if (!p || typeof p !== 'string') return ''
+      if (p.indexOf('\\\\') === 0) {
+        const parts = p.slice(2).split('\\')
+        return parts[0] || ''
+      }
+      if (p.indexOf('//') === 0) {
+        const parts = p.slice(2).split('/')
+        return parts[0] || ''
+      }
+      const m = p.match(/^([^\\\/:]+)/)
+      return (m && m[1]) ? m[1] : ''
     }
   },
   computed: {
