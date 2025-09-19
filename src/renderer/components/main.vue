@@ -428,10 +428,8 @@
                     <el-progress
                       class="ribbon-progress"
                       :color="customColors"
-                      :width="60"
                       define-back-color="#dfe4ed"
                       :format="() => String(scope.row.RibbonAmount || 0)"
-                      :stroke-width="3"
                       :percentage="safePercent(scope.row.RibbonAmount, getRibbonAmount(scope.row.ModeName, scope.row.RibbonType))"></el-progress>
                   </template>
                 </el-table-column>
@@ -466,6 +464,7 @@
                   </template>
                 </el-table-column>
                 <el-table-column
+                  align="center"
                   prop="PrinterRemaCapa"
                   :label="$t('main.tablePrinterRemaCapa')"
                   min-width="100">
@@ -1780,11 +1779,10 @@ export default {
     },
     getPrinterRemaCapaAmount(ModeName) {
       // console.log('PrinterRemaCapa', this.ribbonList[ModeName].PrinterRemaCapa)
-      return this.ribbonList[ModeName].PrinterRemaCapa || 0
+      return this.ribbonList[ModeName]&&this.ribbonList[ModeName].PrinterRemaCapa ? this.ribbonList[ModeName].PrinterRemaCapa : 0
     },
     getRibbonAmount(ModeName, RibbonType) {
-      console.log('getRibbonAmount', this.ribbonList)
-      return this.ribbonList[ModeName][RibbonType] || 0
+      return this.ribbonList[ModeName]&&this.ribbonList[ModeName][RibbonType] ? this.ribbonList[ModeName][RibbonType] : 0
     },
     play() {
       this.$confirm(this.$t('index.tipsPlaying'), this.$t('index.tips'), {

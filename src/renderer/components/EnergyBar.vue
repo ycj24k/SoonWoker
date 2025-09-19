@@ -1,6 +1,6 @@
 <template>
   <div class="energy-bar compact energy-dash" :title="tooltip">
-    <div class="energy-cells" :style="{ gap: gap + 'px' }">
+    <div class="energy-cells" :style="{ gap: dynamicGap + 'px' }">
       <div
         v-for="n in segments"
         :key="n"
@@ -23,12 +23,16 @@ export default {
     // 自定义文本
     text: { type: String, default: '' },
     // 尺寸控制（像素）
-    cellWidth: { type: Number, default: 4 },
-    cellHeight: { type: Number, default: 10 },
+    cellWidth: { type: Number, default: 5 },
+    cellHeight: { type: Number, default: 14 },
     gap: { type: Number, default: 1 },
     borderRadius: { type: Number, default: 1 },
   },
   computed: {
+    dynamicGap() {
+      // 6个能量格的间隙比8个的大一点
+      return this.segments === 6 ? Math.max(this.gap, 2) : this.gap
+    },
     litCells() {
       const clamped = Math.max(0, Math.min(100, Math.round(this.percent || 0)))
       // 一个能量格代表10（进1制向上取整）
