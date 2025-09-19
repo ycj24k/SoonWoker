@@ -193,7 +193,18 @@
                   </el-select>
                 </el-form-item>
 
-                <!-- 移除不需要的U盘格式列 -->
+                <el-form-item :label="$t('work.formatFile')">
+                  <el-select
+                    :placeholder="$t('work.pleaseSelect')"
+                    v-model="high_setting_form.formatFile">
+                    <el-option
+                      v-for="item in high_setting.formatFile"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value">
+                    </el-option>
+                  </el-select>
+                </el-form-item>
                 <el-form-item :label="$t('work.hash')">
                   <el-switch v-model="high_setting_form.s1"> </el-switch>
                 </el-form-item>
@@ -205,6 +216,9 @@
                 </el-form-item>
                 <el-form-item :label="$t('work.spanUSBcard')">
                   <el-switch v-model="high_setting_form.Span_USBcard"> </el-switch>
+                </el-form-item>
+                <el-form-item :label="$t('work.hasAddFile')">
+                  <el-switch v-model="high_setting_form.hasAddFile"> </el-switch>
                 </el-form-item>
                 <!--<el-form-item :label="$t('work.disk')">
 									<el-switch v-model="high_setting_form.s4">
@@ -1153,7 +1167,8 @@ export default {
         repass: '',
         localfiles: false, //本地文件
         formatFile: 0, // auto
-        Span_USBcard: false
+        Span_USBcard: false,
+        hasAddFile: false //拷贝附加文件
       },
       file_name: null,
       file_name3: this.$t('work.binImg'),
@@ -2137,6 +2152,7 @@ export default {
       //data += "&local=" + this.high_setting_form.localfiles; //本地文件开关
       data += '&copy_cache_data=' + this.isCopy //本地文件开关
       data += '&SpanUcard=' + this.high_setting_form.Span_USBcard //允许跨卡
+      data += '&hasAddFile=' + this.high_setting_form.hasAddFile //拷贝附加文件
       data += '&version=local' //单机版
       data += '&hash=' + this.high_setting_form.s1 //hash
       data += '&md5=' + this.high_setting_form.s2 //md5

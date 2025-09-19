@@ -454,6 +454,7 @@ export default {
     template: "模板",
     mixMode: "制作混合模式存储卡",
     spanUSBcard: "允许跨卡",
+    hasAddFile: "拷贝附加文件",
     size_form_error: "请选择容量",
     size: "容量：",
     content: "拷贝类型：",
