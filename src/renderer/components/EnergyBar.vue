@@ -1,6 +1,6 @@
 <template>
   <div class="energy-bar compact energy-dash" :title="tooltip">
-    <div class="energy-cells" :style="{ gap: gap + 'px' }">
+    <div class="energy-cells" :style="{ gap: dynamicGap + 'px' }">
       <div
         v-for="n in segments"
         :key="n"
@@ -23,43 +23,78 @@ export default {
     // 自定义文本
     text: { type: String, default: '' },
     // 尺寸控制（像素）
-    cellWidth: { type: Number, default: 4 },
-    cellHeight: { type: Number, default: 10 },
+    cellWidth: { type: Number, default: 5 },
+    cellHeight: { type: Number, default: 14 },
     gap: { type: Number, default: 1 },
     borderRadius: { type: Number, default: 1 },
   },
   computed: {
+    dynamicGap() {
+      // 6个能量格的间隙比8个的大一点，10个格子的间隙适中
+      if (this.segments === 6) return 2
+      return this.gap
+    },
     litCells() {
-      const clamped = Math.max(0, Math.min(100, Math.round(this.percent || 0)))
+      // 处理科学计数法、带符号和逗号的数值
+      const percent = this.parseNumericValue(this.percent)
+      const clamped = Math.max(0, Math.min(100, Math.round(percent)))
       // 一个能量格代表10（进1制向上取整）
       const cells = Math.ceil(clamped / 10)
       return Math.max(0, Math.min(this.segments, cells))
     },
     displayText() {
-      return this.text || `${Math.max(0, Math.min(100, Math.round(this.percent || 0)))}%`
+      const percent = this.parseNumericValue(this.percent)
+      return this.text || `${Math.max(0, Math.min(100, Math.round(percent)))}%`
     },
     tooltip() {
       return this.displayText
     },
     tone() {
       // 低电量红 / 中电量橙 / 高电量绿
-      const p = Math.max(0, Math.min(100, this.percent || 0))
+      const percent = this.parseNumericValue(this.percent)
+      const p = Math.max(0, Math.min(100, percent))
       if (p <= 20) return 'danger'
       if (p <= 50) return 'warning'
       return 'success'
     },
     chargingIndex() {
-      // 若不是整十，最后一格视为“充能中”
-      const p = Math.max(0, Math.min(100, this.percent || 0))
+      // 若不是整十，最后一格视为"充能中"
+      const percent = this.parseNumericValue(this.percent)
+      const p = Math.max(0, Math.min(100, percent))
       if (p % 10 === 0 || this.litCells === 0) return -1
       return this.litCells
     }
   },
   methods: {
+    parseNumericValue(value) {
+      if (value === null || value === undefined || value === '') return 0
+      
+      // 转换为字符串处理
+      let str = String(value).trim()
+      
+      // 移除逗号分隔符
+      str = str.replace(/,/g, '')
+      
+      // 处理科学计数法 (如 1.23e+5, 1.23E-2)
+      if (/[eE]/.test(str)) {
+        const num = parseFloat(str)
+        return isFinite(num) ? num : 0
+      }
+      
+      // 处理带符号的数值 (如 +123, -456)
+      if (/^[+-]/.test(str)) {
+        const num = parseFloat(str)
+        return isFinite(num) ? num : 0
+      }
+      
+      // 普通数值转换
+      const num = parseFloat(str)
+      return isFinite(num) ? num : 0
+    },
     cellClass(n) {
       const lit = n <= this.litCells
       // 仿数码表样式：前2格为红色，其余为绿色（只在被点亮时着色）
-      const zone = n <= 2 ? 'low' : 'high'
+      const zone = 'high'
       return [
         'energy-cell',
         lit ? (zone === 'low' ? 'is-red' : 'is-green') : 'is-off',

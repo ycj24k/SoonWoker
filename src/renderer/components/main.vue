@@ -223,6 +223,7 @@
                     :class="{ guide_body: beginStep && currentStep == 7 }">
                     <el-button
                       type="primary"
+                      :disabled="infoData.length == 0 && state == false"
                       @click="newWork">
                       {{ $t('index.newWork') }}
                     </el-button>
@@ -421,18 +422,19 @@
                   min-width="80">
                 </el-table-column>
                 <el-table-column
+                  align="center"
                   prop="RibbonAmount"
                   :label="$t('main.tableRibbonAmount')"
                   min-width="100">
                   <template slot-scope="scope">
-                    <el-progress
-                      class="ribbon-progress"
-                      :color="customColors"
-                      :width="60"
-                      define-back-color="#dfe4ed"
-                      :format="() => String(scope.row.RibbonAmount || 0)"
-                      :stroke-width="3"
-                      :percentage="safePercent(scope.row.RibbonAmount, getRibbonAmount(scope.row.ModeName, scope.row.RibbonType))"></el-progress>
+                    <EnergyBar
+                      :percent="getRibbonPercent(scope.row.RibbonAmount, getRibbonAmount(scope.row.ModeName, scope.row.RibbonType))"
+                      :segments="10"
+                      :text="String(scope.row.RibbonAmount || 0)"
+                      :show-text="false"
+                      :gap="1"
+                      :border-radius="1">
+                    </EnergyBar>
                   </template>
                 </el-table-column>
                 <el-table-column
@@ -466,13 +468,14 @@
                   </template>
                 </el-table-column>
                 <el-table-column
+                  align="center"
                   prop="PrinterRemaCapa"
                   :label="$t('main.tablePrinterRemaCapa')"
                   min-width="100">
                   <template slot-scope="scope">
                     <EnergyBar
-                      :percent="safePercent((scope.row.PrinterRemaCapa > 0 ? scope.row.PrinterRemaCapa : 0), getPrinterRemaCapaAmount(scope.row.ModeName))"
-                      :segments="(scope.row.ModeName === 'TH80N' ? 6 : 8)"
+                      :percent="safePercent((scope.row.PrinterRemaCapa > 0 ? scope.row.PrinterRemaCapa : 0), 100)"
+                      :segments="(os.CardsoonModel&&os.CardsoonModel.toLowerCase() === 'th80n' ? 6 : 8)"
                       :showText="true"
                       :text="String(scope.row.PrinterRemaCapa > 0 ? scope.row.PrinterRemaCapa : 0)" />
                   </template>
@@ -1150,8 +1153,10 @@ export default {
       return row.AssUuid ? 'ass-row' : ''
     },
     safePercent(value, total) {
-      const v = Number(value)
-      const t = Number(total)
+      console.log(value, total)
+      // 处理科学计数法、带符号和逗号的数值
+      const v = this.parseNumericValue(value)
+      const t = this.parseNumericValue(total)
       if (!isFinite(v) || !isFinite(t) || t <= 0) return 0
       const p = (v / t) * 100
       if (!isFinite(p) || isNaN(p)) return 0
@@ -1780,11 +1785,44 @@ export default {
     },
     getPrinterRemaCapaAmount(ModeName) {
       // console.log('PrinterRemaCapa', this.ribbonList[ModeName].PrinterRemaCapa)
-      return this.ribbonList[ModeName].PrinterRemaCapa || 0
+      return this.ribbonList[ModeName]&&this.ribbonList[ModeName].PrinterRemaCapa ? this.ribbonList[ModeName].PrinterRemaCapa : 0
     },
     getRibbonAmount(ModeName, RibbonType) {
-      console.log('getRibbonAmount', this.ribbonList)
-      return this.ribbonList[ModeName][RibbonType] || 0
+      return this.ribbonList[ModeName]&&this.ribbonList[ModeName][RibbonType] ? this.ribbonList[ModeName][RibbonType] : 0
+    },
+    parseNumericValue(value) {
+      if (value === null || value === undefined || value === '') return 0
+      
+      // 转换为字符串处理
+      let str = String(value).trim()
+      
+      // 移除逗号分隔符
+      str = str.replace(/,/g, '')
+      
+      // 处理科学计数法 (如 1.23e+5, 1.23E-2)
+      if (/[eE]/.test(str)) {
+        const num = parseFloat(str)
+        return isFinite(num) ? num : 0
+      }
+      
+      // 处理带符号的数值 (如 +123, -456)
+      if (/^[+-]/.test(str)) {
+        const num = parseFloat(str)
+        return isFinite(num) ? num : 0
+      }
+      
+      // 普通数值转换
+      const num = parseFloat(str)
+      return isFinite(num) ? num : 0
+    },
+    getRibbonPercent(current, total) {
+      console.log('current, total', current, total)
+      // 处理科学计数法、带符号和逗号的数值
+      const c = this.parseNumericValue(current)
+      const t = this.parseNumericValue(total)
+      if (!t || t <= 0) return 0
+      const percent = (c / t) * 100
+      return Math.max(0, Math.min(100, Math.round(percent)))
     },
     play() {
       this.$confirm(this.$t('index.tipsPlaying'), this.$t('index.tips'), {
@@ -2195,10 +2233,6 @@ a {
 /deep/ .el-table__expand-icon > i {
   font-size: 12px;
 }
-/* 进度条内数字不换行 */
-/deep/ .ribbon-progress .el-progress-bar__innerText {
-  white-space: nowrap;
-}
 
 .user {
   font-size: 15px;
@@ -2260,16 +2294,6 @@ a {
   }
 }
 
-/* 色带进度条样式优化 */
-/deep/ .ribbon-progress .el-progress-bar__outer {
-  background: linear-gradient(180deg, #f3f6fa, #e5ebf5);
-  border-radius: 6px;
-  border: 1px solid #cfd6e3;
-  box-shadow: inset 0 1px 2px rgba(0,0,0,.08);
-}
-/deep/ .ribbon-progress .el-progress-bar__inner {
-  border-radius: 6px;
-}
 +.ribbon-wrap {
   display: inline-flex;
   align-items: center;

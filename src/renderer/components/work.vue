@@ -1096,7 +1096,7 @@ export default {
       //    value: 4,
       //    label: this.$t("work.forbidCopyU")
       //}],
-      size_form: 4,
+      size_form: null,
       type_form: 0,
       file_form: 0,
       number: 1,
