@@ -1143,6 +1143,7 @@ export default {
       this.doingWorkStatus = false
     }, 10000)
     this.timer2 = setInterval(this.getPrintData, this.refreshTime2)
+    console.log(this.refreshTime1,this.refreshTime2)
   },
   beforeDestroy() {
     this.stopTimer()
@@ -1153,7 +1154,6 @@ export default {
       return row.AssUuid ? 'ass-row' : ''
     },
     safePercent(value, total) {
-      console.log(value, total)
       // 处理科学计数法、带符号和逗号的数值
       const v = this.parseNumericValue(value)
       const t = this.parseNumericValue(total)
@@ -1816,7 +1816,6 @@ export default {
       return isFinite(num) ? num : 0
     },
     getRibbonPercent(current, total) {
-      console.log('current, total', current, total)
       // 处理科学计数法、带符号和逗号的数值
       const c = this.parseNumericValue(current)
       const t = this.parseNumericValue(total)
@@ -1988,11 +1987,13 @@ export default {
   },
   watch: {
     hasDoingWork: {
-      handler() {
+      handler(val) {
+        console.log('hasDoingWork changed:', val)
         if (this.hasDoingWork) {
           this.intervalTime = parseInt(this.refreshTime1)
           clearInterval(this.timer1)
           this.timer1 = setInterval(this.initData, this.intervalTime)
+          console.log('hasDoingWork', this.intervalTime)
         } else {
           this.intervalTime = parseInt(this.refreshTime2)
           clearInterval(this.timer1)
