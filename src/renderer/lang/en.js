@@ -391,14 +391,17 @@ export default {
     templateFile: "Fail to read template file"
   },
   work: {
+    template: "Template",
     mixMode: "Mix mode",
     spanUSBcard: "span USB card",
+    hasAddFile: "Copy additional files",
     size_form_error: "Please choose the size form",
     size: "Capacity:",
     content: "Content:",
     fileAnd: "Files & Folders",
     eCd: "VirtualDisc",
     zip: "ZipArchive",
+    iso: "Generate ISO then copy",
     passZip: "EncryptZip",
     forbidCopyU: "Anti-Copy",
     partType: "USBFormat",
