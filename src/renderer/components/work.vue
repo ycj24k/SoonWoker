@@ -2727,6 +2727,9 @@ export default {
     file_form: {
       immediate: true,
       handler(val) {
+        if (!val || !this.filter_rules[val]) {
+          return
+        }
         if (this.filter_rules[val].indexOf(this.type_form) == -1) {
           //现在选择的是不可选择的。
           this.type_form = this.filter_rules[val][0]
