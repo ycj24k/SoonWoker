@@ -223,7 +223,6 @@
                     :class="{ guide_body: beginStep && currentStep == 7 }">
                     <el-button
                       type="primary"
-                      :disabled="infoData.length == 0 && state == false"
                       @click="newWork">
                       {{ $t('index.newWork') }}
                     </el-button>
