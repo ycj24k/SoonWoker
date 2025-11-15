@@ -45,7 +45,7 @@ class ScreenRecorder {
     }
   }
 
-  async stopRecording(videoData) {
+  async stopRecording(videoData, taskId = '') {
     if (!this.isRecording) {
       return { success: false, message: '当前没有进行录制' };
     }
@@ -62,9 +62,20 @@ class ScreenRecorder {
         fs.mkdirSync(videosDir, { recursive: true });
       }
 
-      // 生成文件名：soonworker+时间戳
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
-      const fileName = `soonworker_${timestamp}.webm`;
+      // 生成文件名：任务ID_日期时间格式 (YYYYMMDD_HHmmss)
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      const dateTimeStr = `${year}${month}${day}_${hours}${minutes}${seconds}`;
+      
+      // 如果有任务ID，使用任务ID_日期时间，否则使用日期时间
+      const fileName = taskId 
+        ? `${taskId}_${dateTimeStr}.webm`
+        : `${dateTimeStr}.webm`;
       const filePath = path.join(videosDir, fileName);
 
       // 将base64数据转换为Buffer并保存
@@ -102,8 +113,8 @@ ipcMain.handle('start-recording', async () => {
   return await recorder.startRecording();
 });
 
-ipcMain.handle('stop-recording', async (event, videoData) => {
-  return await recorder.stopRecording(videoData);
+ipcMain.handle('stop-recording', async (event, videoData, taskId) => {
+  return await recorder.stopRecording(videoData, taskId);
 });
 
 ipcMain.handle('get-videos-path', () => {

@@ -28,6 +28,12 @@ const { ipcRenderer } = require('electron');
 
 export default {
   name: 'ScreenRecorder',
+  props: {
+    taskId: {
+      type: String,
+      default: ''
+    }
+  },
   data() {
     return {
       isRecording: false,
@@ -37,7 +43,8 @@ export default {
       startTime: null,
       recordingTime: '00:00',
       timer: null,
-      stream: null
+      stream: null,
+      currentTaskId: '' // 录屏开始时的任务ID
     };
   },
   methods: {
@@ -99,6 +106,8 @@ export default {
         this.mediaRecorder.start();
         this.isRecording = true;
         this.startTime = Date.now();
+        // 保存录屏开始时的任务ID
+        this.currentTaskId = this.taskId || '';
         this.startTimer();
         
         this.$message.success(this.$t('recorder.recordingStarted') || '开始录制');
@@ -154,8 +163,8 @@ export default {
         reader.onloadend = async () => {
           const base64data = reader.result;
           
-          // 发送到主进程保存
-          const result = await ipcRenderer.invoke('stop-recording', base64data);
+          // 发送到主进程保存，传递任务ID
+          const result = await ipcRenderer.invoke('stop-recording', base64data, this.currentTaskId);
           
           if (result.success) {
             this.$message.success(this.$t('recorder.savedSuccess') || `录制已保存: ${result.fileName}`);

@@ -257,6 +257,7 @@
           <!-- 屏幕录制按钮 -->
               <screen-recorder
       ref="screenRecorder"
+      :task-id="upload_disk"
       @recording-started="onRecordingStarted"
       @recording-stopped="onRecordingStopped"
       @recording-saved="onRecordingSaved"
