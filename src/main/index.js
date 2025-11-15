@@ -1,4 +1,4 @@
-const { Menu, app, BrowserWindow } = require("electron");
+const { Menu, app, BrowserWindow, shell } = require("electron");
 // Note: Store should be handled in renderer process, not main
 // import "../renderer/store";
 const fs = require('fs');
@@ -7,11 +7,14 @@ const path = require('path')
 // 导入录制器模块（设置全局变量）
 require('./recorder');
 // require("./fingerprint/win");
+// 获取应用根目录（兼容三端，与 exe 同级）
+// 开发环境：使用项目根目录
+// 生产环境：获取可执行文件所在目录（与 exe 同级，兼容 Windows/Linux/macOS）
 let root = "";
-if (process.env.NODE_ENV !== "development") {
-  root = path.dirname(app.getPath("exe"));
+if (process.env.NODE_ENV === "development") {
+  root = path.join(__dirname, '../../');
 } else {
-  root = "..\\..\\";
+  root = path.dirname(app.getPath("exe"));
 }
 
 // 获取日志文件的路径
@@ -88,7 +91,63 @@ if (!gotTheLock) {
     }
   });
 }
-app.on("ready", createWindow);
+// 执行安装脚本（仅在首次安装时执行一次，兼容三端，无需额外权限）
+function runInstallScript() {
+  const productionServerPath = path.join(root, "ProductionServer");
+  const installFlagPath = path.join(productionServerPath, ".install_completed");
+  
+  // 检查是否已执行过
+  if (fs.existsSync(installFlagPath)) {
+    console.log("安装脚本已执行过，跳过本次执行");
+    return;
+  }
+
+  // 根据平台确定脚本文件名和命令（使用 sh 执行 .sh 文件无需执行权限）
+  const scriptName = process.platform === "win32" ? "install.bat" : "install.sh";
+  const installScriptPath = path.join(productionServerPath, scriptName);
+  const execCommand = process.platform === "win32" 
+    ? `"${installScriptPath}"` 
+    : `sh "${installScriptPath}"`; // 使用 sh 执行，无需执行权限
+
+  // 检查脚本是否存在
+  if (!fs.existsSync(installScriptPath)) {
+    console.log("安装脚本不存在: " + installScriptPath);
+    return;
+  }
+
+  // 执行安装脚本
+  console.log("首次安装，执行安装脚本: " + installScriptPath);
+  writeLog(`首次安装，执行安装脚本: ${installScriptPath} (平台: ${process.platform})`);
+  
+  child_process.exec(execCommand, { cwd: productionServerPath }, (error, stdout, stderr) => {
+    if (error) {
+      console.error("安装脚本执行错误:", error);
+      writeLog("安装脚本执行错误: " + error.message);
+      return;
+    }
+
+    // 执行成功，创建标记文件
+    try {
+      fs.writeFileSync(installFlagPath, new Date().toISOString(), "utf-8");
+      console.log("安装脚本执行完成");
+      writeLog("安装脚本执行完成");
+      if (stdout) console.log("输出:", stdout);
+      if (stderr) console.error("错误输出:", stderr);
+    } catch (writeErr) {
+      console.error("创建安装标记文件失败:", writeErr);
+      writeLog("创建安装标记文件失败: " + writeErr.message);
+    }
+  });
+}
+
+app.on("ready", () => {
+  // 在创建窗口后执行安装脚本
+  createWindow();
+  // 延迟执行安装脚本，确保应用已启动
+  setTimeout(() => {
+    runInstallScript();
+  }, 1000);
+});
 
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
@@ -115,9 +174,18 @@ app.on("open-file", (e, filePath) => {
   preFilePath = filePath;
 });
 
-ipcMain.on('open-help-file', event => {   
-  var exePath = path.dirname(app.getPath('exe'));
-  child_process.exec(`start "" "${exePath}/help/User Manual.pdf"`);
+ipcMain.on('open-help-file', async event => {   
+  const helpFilePath = path.join(root, "ProductionServer", "User Manual.pdf");
+  
+  try {
+    await shell.openPath(helpFilePath);
+  } catch (error) {
+    console.error("打开帮助文件错误:", error);
+    writeLog("打开帮助文件错误: " + error.message);
+    if (event.reply) {
+      event.reply('open-help-file-error', error.message);
+    }
+  }
 });
 
 ipcMain.on("get-root", (event) => {

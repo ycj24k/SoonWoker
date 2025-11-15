@@ -167,7 +167,7 @@ export default {
       //fs.writeFileSync("../Debug/config.ini");
       let that = this;
       fs.writeFile(
-        this.root + "/../ProductionServer/config.ini",
+        this.root + "/ProductionServer/config.ini",
         ini.stringify(this.iniData),
         function (err) {
           if (err) {
@@ -187,7 +187,7 @@ export default {
     //var data = ini.parse(fs.readFileSync("F:\\controll\\config.ini", "utf-8"));
     ipcRenderer.on("get-root-callback", (event, data) => {
       this.root = data;
-      fs.readFile(this.root + "/../ProductionServer/config.ini", "utf-8", (err, res) => {
+      fs.readFile(this.root + "/ProductionServer/config.ini", "utf-8", (err, res) => {
         if (err) {
           console.log(err);
           this.$message.error(that.$t("dispose.errorRead"));

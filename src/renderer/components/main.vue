@@ -1296,9 +1296,9 @@ export default {
     },
     getOS() {
       let that = this
-      console.log(this.root + '/../ProductionServer/config.ini')
-      fs.readFile(this.root + '/../ProductionServer/config.ini', 'utf-8', (err, res) => {
-        console.log(this.root + '/../ProductionServer/config.ini')
+      console.log(this.root + '/ProductionServer/config.ini')
+      fs.readFile(this.root + '/ProductionServer/config.ini', 'utf-8', (err, res) => {
+        console.log(this.root + '/ProductionServer/config.ini')
         if (err) {
           that.isLocal = false
         } else {
