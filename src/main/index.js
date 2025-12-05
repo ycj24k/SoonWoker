@@ -175,7 +175,7 @@ app.on("open-file", (e, filePath) => {
 });
 
 ipcMain.on('open-help-file', async event => {   
-  const helpFilePath = path.join(root, "ProductionServer", "User Manual.pdf");
+  const helpFilePath = path.join(root, "help", "User Manual.pdf");
   
   try {
     await shell.openPath(helpFilePath);

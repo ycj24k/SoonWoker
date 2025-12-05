@@ -27,7 +27,8 @@
     },
     "extraFiles": [
       "lib",
-      "ProductionServer"
+      "ProductionServer",
+      "help"
     ],
     "nsis": {
       "oneClick": false,
