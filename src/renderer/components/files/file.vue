@@ -13,39 +13,19 @@
     <fileEmpty v-if="allNumber == 0" />
     <fileList v-else :list="filesList" :del="delFile" :key="key" />
     <div v-if="progressVisible">
-      <el-dialog
-        :close-on-click-modal="false"
-        width="500px"
-        :visible.sync="progressVisible"
-        :append-to-body="true"
-        class="prodialog"
-      >
-        <progressdialog
-          :list="filesList"
-          :overNumber="overNumber"
-          :allNumber="allNumber"
-          :changevisiable="changeProgressvisible"
-          :changestate="changestate"
-          :isSucess="isSucess"
-          ref="progressdialog"
-        ></progressdialog>
+      <el-dialog :close-on-click-modal="false" width="500px" :visible.sync="progressVisible" :append-to-body="true"
+        class="prodialog">
+        <progressdialog :list="filesList" :overNumber="overNumber" :allNumber="allNumber"
+          :changevisiable="changeProgressvisible" :changestate="changestate" :isSucess="isSucess" ref="progressdialog">
+        </progressdialog>
       </el-dialog>
     </div>
 
     <div v-if="archiverVisible">
-      <el-dialog
-        :close-on-click-modal="false"
-        width="500px"
-        :visible.sync="archiverVisible"
-        :append-to-body="true"
-        class="archiverDialog"
-        :show-close="false"
-      >
-        <archiverdialog
-          :isOver="archiverIsover"
-          :isFalse="archiverIsfalse"
-          :changevisiable="changeArchivervisible"
-        ></archiverdialog>
+      <el-dialog :close-on-click-modal="false" width="500px" :visible.sync="archiverVisible" :append-to-body="true"
+        class="archiverDialog" :show-close="false">
+        <archiverdialog :isOver="archiverIsover" :isFalse="archiverIsfalse" :changevisiable="changeArchivervisible">
+        </archiverdialog>
       </el-dialog>
     </div>
     <slot></slot>
@@ -68,8 +48,8 @@ const isNetworkPath = (path) => {
   // 检测是否为网络路径
   // Windows 网络路径: \\hostname\path 或 \\IP\path
   // Unix 网络路径: //hostname/path 或 //IP/path
-  return path.startsWith('\\\\') || path.startsWith('//') || 
-         (path.includes(':') && !path.includes('\\') && !path.includes('/'));
+  return path.startsWith('\\\\') || path.startsWith('//') ||
+    (path.includes(':') && !path.includes('\\') && !path.includes('/'));
 };
 
 const extractHostName = (path) => {
@@ -190,12 +170,12 @@ export default {
           // 是文件夹
           this.sizeChange(f.size);
         }
-        
+
         // 检测是否为网络路径
         if (isNetworkPath(f.path)) {
           this.addNetworkPath(f.path);
         }
-        
+
         return true;
       } else {
         //有了，不用加入
@@ -405,7 +385,7 @@ export default {
     getLists() {
       return this.filesList;
     },
-    
+
     // 添加网络路径到列表（按主机去重，仅认证根目录，如 \\\\NAS）
     addNetworkPath(path) {
       const hostName = extractHostName(path);
@@ -440,7 +420,7 @@ export default {
         this.$emit('network-paths-changed', this.getNetworkPaths());
       }
     },
-    
+
     // 获取网络路径列表（按主机去重，返回根路径）
     getNetworkPaths() {
       const uniqueByHost = {};
@@ -456,13 +436,13 @@ export default {
       }
       return Object.values(uniqueByHost);
     },
-    
+
     // 检查是否有网络路径
     hasNetworkPaths() {
       return this.networkPaths.length > 0;
     },
-    
-    haveFolderIsCalc() {},
+
+    haveFolderIsCalc() { },
   },
   computed: {},
   watch: {},
@@ -476,11 +456,13 @@ export default {
   align-items: center;
   flex-wrap: wrap;
 }
+
 .archiverDialog {
   display: flex;
   justify-content: center;
   align-items: center;
   flex-wrap: wrap;
+
   /deep/.el-dialog__header {
     padding: 10px;
   }
@@ -488,12 +470,15 @@ export default {
 
 .files {
   width: 100%;
-  background-color: #f5f5f5;
-  margin: 10px auto 0;
+  background-color: transparent;
+  margin: 0;
   font-size: 12px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  box-shadow: none;
   position: relative;
-  height: 375px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .btn-group {

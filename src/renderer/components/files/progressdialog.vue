@@ -1,10 +1,8 @@
 <template>
   <div class="dialog">
     <div class="progress">
-      <el-progress
-        :percentage="parseInt(fake.progress * 100)"
-        :format="format"
-      ></el-progress>
+      <el-progress :percentage="Math.min(100, Math.max(0, parseInt(fake.progress * 100) || 0))"
+        :format="format"></el-progress>
       <div class="txt">
         <div class="over">{{ overNumber }}</div>
         <div class="all">/{{ allNumber }}</div>
@@ -26,20 +24,10 @@
       </div>
       <div v-else-if="!isSucess" style="color: red">文件上传失败！！！</div>
       <div class="button">
-        <el-button
-          ref="btnStop"
-          type="success"
-          @click="stop()"
-          :disabled="overNumber == allNumber || !isSucess"
-          >{{ $t("dialog.stop") }}</el-button
-        >
-        <el-button
-          ref="btnOver"
-          type="success"
-          @click="changevisiable(flase)"
-          :disabled="overNumber != allNumber && isSucess"
-          >{{ $t("dialog.over") }}</el-button
-        >
+        <el-button ref="btnStop" type="success" @click="stop()" :disabled="overNumber == allNumber || !isSucess">{{
+          $t("dialog.stop") }}</el-button>
+        <el-button ref="btnOver" type="success" @click="changevisiable(flase)"
+          :disabled="overNumber != allNumber && isSucess">{{ $t("dialog.over") }}</el-button>
       </div>
     </div>
   </div>
@@ -83,15 +71,17 @@ export default {
     getPercent(num, total) {
       num = parseFloat(num);
       total = parseFloat(total);
-      if (isNaN(num) || isNaN(total)) {
-        return "-";
+      if (isNaN(num) || isNaN(total) || total <= 0) {
+        return 0;
       }
-      return total <= 0 ? "0" : Math.round((num / total) * 10000) / 10000.0;
+      let per = num / total;
+      return per > 1 ? 1 : per;
     },
     stop() {
       this.changestate(false);
       this.isSucess = false;
-      this.$message({offset:100,
+      this.$message({
+        offset: 100,
         message: this.$t("dialog.haveStop"),
         type: "warning",
       });
@@ -112,7 +102,7 @@ export default {
           this.sub.end();
           //console.log("sub end");
         }
-       
+
         const newlist = [];
         for (let i in this.list) {
           if (this.list[i].state == true) {
@@ -139,34 +129,35 @@ export default {
       immediate: true,
       deep: true,
     },
-    isSucess:{
+    isSucess: {
       // 数据发生变化就会调用这个函数
       handler(newVal, oldVal) {
-        if(!this.isSucess){
+        if (!this.isSucess) {
           this.sub.stop();
         }
 
-    },
-     // 立即处理 进入页面就触发
-     immediate: true,
+      },
+      // 立即处理 进入页面就触发
+      immediate: true,
       deep: true,
-  }
+    }
 
   },
 };
 </script>
 
 <style lang="less" scoped>
-.dialog {
-}
 .progress {
+
   // border: 1px black solid;
   /deep/ .el-progress-bar {
     width: 97%;
   }
+
   /deep/.el-progress__text {
     float: right;
   }
+
   .txt {
     position: absolute;
     top: 55px;
@@ -183,6 +174,7 @@ export default {
       font-size: 16px;
       font-weight: 600;
     }
+
     .all {
       // border: 1px black solid;
       color: black;
@@ -194,17 +186,21 @@ export default {
 .records {
   max-height: 400px;
   overflow: auto;
+
   &::-webkit-scrollbar {
     /*滚动条整体样式*/
-    width: 10px; /*高宽分别对应横竖滚动条的尺寸*/
+    width: 10px;
+    /*高宽分别对应横竖滚动条的尺寸*/
     height: 1px;
   }
+
   &::-webkit-scrollbar-thumb {
     /*滚动条里面小方块*/
     border-radius: 10px;
     box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
     background: #c7c7cb;
   }
+
   &::-webkit-scrollbar-track {
     /*滚动条里面轨道*/
     box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
@@ -212,13 +208,15 @@ export default {
     background: #ededed;
   }
 }
+
 .record {
   margin-top: 15px;
   display: flex;
   flex-wrap: nowrap;
   justify-content: space-between;
-  .name {
-  }
+
+
+
   .state {
     margin-right: 20px;
   }
@@ -228,6 +226,7 @@ export default {
   height: 30px;
   width: 100%;
   margin-top: 15px;
+
   .button {
     float: right;
     display: flex;
@@ -235,6 +234,7 @@ export default {
     align-items: center;
     flex-wrap: wrap;
     width: 50%;
+
     .el-button {
       display: flex;
       justify-content: center;
@@ -243,6 +243,7 @@ export default {
       width: 50px;
     }
   }
+
   .text {
     line-height: 30px;
     float: left;

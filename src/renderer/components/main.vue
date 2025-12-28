@@ -1,43 +1,27 @@
 <template>
   <div style="height: 100%; position: relative">
-    <div
-      v-if="beginStep && parseInt(currentStep) >= 0 && parseInt(currentStep) < 8"
-      class="bg_box"
-      style="position: absolute; top: 0; left: 0; z-index: 10; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5)"></div>
+    <div v-if="beginStep && parseInt(currentStep) >= 0 && parseInt(currentStep) < 8" class="bg_box"
+      style="position: absolute; top: 0; left: 0; z-index: 10; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5)">
+    </div>
     <div style="height: 100%; width: 100%; display: flex">
-      <div
-        :span="3"
-        style="height: 100%; width: 164px">
+      <div :span="3" style="height: 100%; width: 164px">
         <div class="grid-content bg-purple left">
           <div class="title">
             {{ $t('index.wordSpace') }}
           </div>
           <!-- @click="() => (printData = index)" -->
-          <div
-            class="card"
-            v-for="(item) of infoData"
-            :key="item.PrinterID"
+          <div class="card" v-for="(item) of infoData" :key="item.PrinterID"
             style="background-color: #f5f5f5; text-align: left">
             <span style="font-size: 18px; margin-left: 40px">{{ getPrintName(item.PrinterID, true) }}</span>
-            <span style="font-size: 9px">{{ item.PrinterType == '-1' ? $t('index.workspacenodata') : item.PrinterType }}</span>
+            <span style="font-size: 9px">{{ item.PrinterType == '-1' ? $t('index.workspacenodata') : item.PrinterType
+            }}</span>
           </div>
         </div>
       </div>
-      <div
-        :span="18"
-        style="height: 100%; width: calc(100% - 328px)">
-        <div
-          class="grid-content bg-purple-light mid"
-          id="rte"
-          style="position: relative">
-          <div
-            class="title"
-            style="position: relative; height: 45px; display: flex; justify-content: space-between">
-            <el-popover
-              v-if="guideStep"
-              :placement="guideStep[0].placement"
-              width="250"
-              trigger="manual"
+      <div :span="18" style="height: 100%; width: calc(100% - 328px)">
+        <div class="grid-content bg-purple-light mid" id="rte" style="position: relative">
+          <div class="title" style="position: relative; height: 45px; display: flex; justify-content: space-between">
+            <el-popover v-if="guideStep" :placement="guideStep[0].placement" width="250" trigger="manual"
               v-model="guideStep[0].show">
               <div class="guide_box">
                 <div class="guide_title">
@@ -45,47 +29,21 @@
                 </div>
                 <div class="guide_desc">{{ $t(`guide.step1`) }}</div>
                 <div class="guide_btns">
-                  <el-button
-                    @click="exitGuide"
-                    class="guide_btn1"
-                    size="mini"
-                    type="text"
-                    >{{ $t('guide.skip') }}</el-button
-                  >
-                  <el-button
-                    v-if="parseInt(currentStep) > 0"
-                    @click="prevStep"
-                    class="guide_btn1"
-                    size="mini"
-                    >{{ $t('guide.prev') }}</el-button
-                  >
-                  <el-button
-                    @click="nextStep"
-                    class="guide_btn2"
-                    size="mini"
-                    type="primary"
-                    >{{ parseInt(currentStep) == guideStep.length - 1 ? $t('guide.complete') : $t('guide.next') }}</el-button
-                  >
+                  <el-button @click="exitGuide" class="guide_btn1" size="mini" type="text">{{ $t('guide.skip')
+                  }}</el-button>
+                  <el-button v-if="parseInt(currentStep) > 0" @click="prevStep" class="guide_btn1" size="mini">{{
+                    $t('guide.prev') }}</el-button>
+                  <el-button @click="nextStep" class="guide_btn2" size="mini" type="primary">{{ parseInt(currentStep) ==
+                    guideStep.length - 1 ? $t('guide.complete') : $t('guide.next') }}</el-button>
                 </div>
               </div>
-              <div
-                slot="reference"
-                :class="{ guide_body: beginStep && currentStep == 0 }"
-                class="switch"
+              <div slot="reference" :class="{ guide_body: beginStep && currentStep == 0 }" class="switch"
                 style="position: relative; left: 0; top: 3px">
-                <el-switch
-                  active-color="#13ce66"
-                  inactive-color="#ff4949"
-                  @change="handleOpenSwitch"
-                  :value="state">
+                <el-switch active-color="#13ce66" inactive-color="#ff4949" @change="handleOpenSwitch" :value="state">
                 </el-switch>
               </div>
             </el-popover>
-            <el-popover
-              v-if="guideStep"
-              :placement="guideStep[1].placement"
-              width="250"
-              trigger="manual"
+            <el-popover v-if="guideStep" :placement="guideStep[1].placement" width="250" trigger="manual"
               v-model="guideStep[1].show">
               <div class="guide_box">
                 <div class="guide_title">
@@ -93,33 +51,15 @@
                 </div>
                 <div class="guide_desc">{{ $t(`guide.step2`) }}</div>
                 <div class="guide_btns">
-                  <el-button
-                    @click="exitGuide"
-                    class="guide_btn1"
-                    size="mini"
-                    type="text"
-                    >{{ $t('guide.skip') }}</el-button
-                  >
-                  <el-button
-                    v-if="parseInt(currentStep) > 0"
-                    @click="prevStep"
-                    class="guide_btn1"
-                    size="mini"
-                    >{{ $t('guide.prev') }}</el-button
-                  >
-                  <el-button
-                    @click="nextStep"
-                    class="guide_btn2"
-                    size="mini"
-                    type="primary"
-                    >{{ currentStep == guideStep.length - 1 ? $t('guide.complete') : $t('guide.next') }}</el-button
-                  >
+                  <el-button @click="exitGuide" class="guide_btn1" size="mini" type="text">{{ $t('guide.skip')
+                  }}</el-button>
+                  <el-button v-if="parseInt(currentStep) > 0" @click="prevStep" class="guide_btn1" size="mini">{{
+                    $t('guide.prev') }}</el-button>
+                  <el-button @click="nextStep" class="guide_btn2" size="mini" type="primary">{{ currentStep ==
+                    guideStep.length - 1 ? $t('guide.complete') : $t('guide.next') }}</el-button>
                 </div>
               </div>
-              <div
-                slot="reference"
-                :class="{ guide_body: beginStep && currentStep == 1 }"
-                class="information"
+              <div slot="reference" :class="{ guide_body: beginStep && currentStep == 1 }" class="information"
                 style="font-size: 15px; display: flex; gap: 25px; position: relative; top: 5px">
                 <div style="display: inline-block">
                   <div style="text-decoration: underline">
@@ -141,11 +81,7 @@
                 </div>
               </div>
             </el-popover>
-            <el-popover
-              v-if="guideStep"
-              :placement="guideStep[2].placement"
-              width="250"
-              trigger="manual"
+            <el-popover v-if="guideStep" :placement="guideStep[2].placement" width="250" trigger="manual"
               v-model="guideStep[2].show">
               <div class="guide_box">
                 <div class="guide_title">
@@ -153,40 +89,18 @@
                 </div>
                 <div class="guide_desc">{{ $t(`guide.step3`) }}</div>
                 <div class="guide_btns">
-                  <el-button
-                    @click="exitGuide"
-                    class="guide_btn1"
-                    size="mini"
-                    type="text"
-                    >{{ $t('guide.skip') }}</el-button
-                  >
-                  <el-button
-                    v-if="parseInt(currentStep) > 0"
-                    @click="prevStep"
-                    class="guide_btn1"
-                    size="mini"
-                    >{{ $t('guide.prev') }}</el-button
-                  >
-                  <el-button
-                    @click="nextStep"
-                    class="guide_btn2"
-                    size="mini"
-                    type="primary"
-                    >{{ currentStep == guideStep.length - 1 ? $t('guide.complete') : $t('guide.next') }}</el-button
-                  >
+                  <el-button @click="exitGuide" class="guide_btn1" size="mini" type="text">{{ $t('guide.skip')
+                  }}</el-button>
+                  <el-button v-if="parseInt(currentStep) > 0" @click="prevStep" class="guide_btn1" size="mini">{{
+                    $t('guide.prev') }}</el-button>
+                  <el-button @click="nextStep" class="guide_btn2" size="mini" type="primary">{{ currentStep ==
+                    guideStep.length - 1 ? $t('guide.complete') : $t('guide.next') }}</el-button>
                 </div>
               </div>
-              <div
-                style="display: flex; align-items: center"
-                class="add"
-                slot="reference"
+              <div style="display: flex; align-items: center" class="add" slot="reference"
                 :class="{ guide_body: beginStep && currentStep == 2 }">
                 <span style="font-size: 18px; line-height: 45px">{{ $t('main.submitTask') }}</span>
-                <el-popover
-                  v-if="guideStep"
-                  :placement="guideStep[7].placement"
-                  width="250"
-                  trigger="manual"
+                <el-popover v-if="guideStep" :placement="guideStep[7].placement" width="250" trigger="manual"
                   v-model="guideStep[7].show">
                   <div class="guide_box">
                     <div class="guide_title">
@@ -194,51 +108,26 @@
                     </div>
                     <div class="guide_desc">{{ $t(`guide.step8`) }}</div>
                     <div class="guide_btns">
-                      <el-button
-                        @click="exitGuide"
-                        class="guide_btn1"
-                        size="mini"
-                        type="text"
-                        >{{ $t('guide.skip') }}</el-button
-                      >
-                      <el-button
-                        v-if="parseInt(currentStep) > 0"
-                        @click="prevStep"
-                        class="guide_btn1"
-                        size="mini"
-                        >{{ $t('guide.prev') }}</el-button
-                      >
-                      <el-button
-                        @click="nextStep"
-                        class="guide_btn2"
-                        size="mini"
-                        type="primary"
-                        >{{ currentStep == guideStep.length - 1 ? $t('guide.complete') : $t('guide.next') }}</el-button
-                      >
+                      <el-button @click="exitGuide" class="guide_btn1" size="mini" type="text">{{ $t('guide.skip')
+                      }}</el-button>
+                      <el-button v-if="parseInt(currentStep) > 0" @click="prevStep" class="guide_btn1" size="mini">{{
+                        $t('guide.prev') }}</el-button>
+                      <el-button @click="nextStep" class="guide_btn2" size="mini" type="primary">{{ currentStep ==
+                        guideStep.length - 1 ? $t('guide.complete') : $t('guide.next') }}</el-button>
                     </div>
                   </div>
-                  <div
-                    style="margin-right: 10px"
-                    slot="reference"
+                  <div style="margin-right: 10px" slot="reference"
                     :class="{ guide_body: beginStep && currentStep == 7 }">
-                    <el-button
-                      type="primary"
-                      @click="newWork">
+                    <el-button type="primary" @click="newWork">
                       {{ $t('index.newWork') }}
                     </el-button>
                   </div>
                 </el-popover>
 
-                <el-button
-                  type="primary"
-                  @click="newNetWork"
-                  v-if="false">
+                <el-button type="primary" @click="newNetWork" v-if="false">
                   {{ $t('index.newWork') }}
                 </el-button>
-                <el-button
-                  type="primary"
-                  @click="openWork()"
-                  v-if="true"
+                <el-button type="primary" @click="openWork()" v-if="true"
                   :disabled="infoData.length == 0 && state == false">
                   {{ $t('admin.openWork') }}
                 </el-button>
@@ -246,19 +135,11 @@
             </el-popover>
             <div class="user">
               <span style="margin-right: 20px">{{ $t('admin.hello') }} {{ user }}</span>
-              <router-link
-                to="/admin"
-                v-if="isAdmin"
-                >{{ $t('main.adminMange') }}</router-link
-              >
+              <router-link to="/admin" v-if="isAdmin">{{ $t('main.adminMange') }}</router-link>
               <router-link to="/">{{ $t('main.out') }}</router-link>
             </div>
           </div>
-          <el-popover
-            v-if="guideStep"
-            :placement="guideStep[4].placement"
-            width="250"
-            trigger="manual"
+          <el-popover v-if="guideStep" :placement="guideStep[4].placement" width="250" trigger="manual"
             v-model="guideStep[4].show">
             <div class="guide_box">
               <div class="guide_title">
@@ -266,49 +147,23 @@
               </div>
               <div class="guide_desc">{{ $t(`guide.step5`) }}</div>
               <div class="guide_btns">
-                <el-button
-                  @click="exitGuide"
-                  class="guide_btn1"
-                  size="mini"
-                  type="text"
-                  >{{ $t('guide.skip') }}</el-button
-                >
-                <el-button
-                  v-if="parseInt(currentStep) > 0"
-                  @click="prevStep"
-                  class="guide_btn1"
-                  size="mini"
-                  >{{ $t('guide.prev') }}</el-button
-                >
-                <el-button
-                  @click="nextStep"
-                  class="guide_btn2"
-                  size="mini"
-                  type="primary"
-                  >{{ currentStep == guideStep.length - 1 ? $t('guide.complete') : $t('guide.next') }}</el-button
-                >
+                <el-button @click="exitGuide" class="guide_btn1" size="mini" type="text">{{ $t('guide.skip')
+                }}</el-button>
+                <el-button v-if="parseInt(currentStep) > 0" @click="prevStep" class="guide_btn1" size="mini">{{
+                  $t('guide.prev') }}</el-button>
+                <el-button @click="nextStep" class="guide_btn2" size="mini" type="primary">{{ currentStep ==
+                  guideStep.length - 1 ? $t('guide.complete') : $t('guide.next') }}</el-button>
               </div>
             </div>
-            <div
-              class="brief"
-              slot="reference"
-              :class="{ guide_body: beginStep && currentStep == 4 }">
-              <el-row
-                :gutter="20"
-                style="height: 100%">
-                <el-col
-                  :span="12"
-                  style="height: 100%">
-                  <div
-                    class="grid-content bg-purple b_left"
+            <div class="brief" slot="reference" :class="{ guide_body: beginStep && currentStep == 4 }">
+              <el-row :gutter="20" style="height: 100%">
+                <el-col :span="12" style="height: 100%">
+                  <div class="grid-content bg-purple b_left"
                     style="padding-top: 1px !important; display: flex; align-items: center">
                     <!-- <div class="b_title">{{ $t("main.systemInformation") }}</div> -->
                     <div style="display: flex; flex-direction: column; justify-content: center; align-items: center">
-                      <img
-                        v-if="os.CardsoonModel"
-                        :src="os.CardsoonModel.indexOf(`TH80N`) != -1 ? N80N : N800N"
-                        width="150"
-                        height="95" />
+                      <img v-if="os.CardsoonModel" :src="os.CardsoonModel.indexOf(`TH80N`) != -1 ? N80N : N800N"
+                        width="150" height="95" />
                       <span style="font-weight: bold; font-size: 18px">{{ $t('main.systemInformation') }}</span>
                     </div>
                     <div style="margin-left: 20px">
@@ -319,17 +174,11 @@
                     </div>
                   </div>
                 </el-col>
-                <el-col
-                  :span="12"
-                  style="height: 100%">
-                  <div
-                    class="grid-content bg-purple b_mid"
+                <el-col :span="12" style="height: 100%">
+                  <div class="grid-content bg-purple b_mid"
                     style="padding-top: 1px !important; display: flex; align-items: center">
                     <div style="display: flex; flex-direction: column; justify-content: center; align-items: center">
-                      <img
-                        src="../assets/cpu.png"
-                        width="150"
-                        height="95" />
+                      <img src="../assets/cpu.png" width="150" height="95" />
                       <span style="font-weight: bold; font-size: 18px">{{ $t('main.hardwareConfiguration') }}</span>
                     </div>
                     <div style="margin-left: 20px">
@@ -339,7 +188,8 @@
                       <div class="item">{{ $t('main.Cpu') }}{{ os.cpu }}</div>
                       <div class="item">{{ $t('main.Memory') }}{{ os.ram }}</div>
                       <div class="item">{{ $t('main.hardDrive') }}{{ os.HD }}</div>
-                      <div class="item" :style="{color: os.cacheSpaceNum < 8 ? '#ff0000' : os.cacheSpaceNum < 20 ? '#ff9f0b' : ''}">
+                      <div class="item"
+                        :style="{ color: os.cacheSpaceNum < 8 ? '#ff0000' : os.cacheSpaceNum < 20 ? '#ff9f0b' : '' }">
                         {{ $t('main.cacheSpace') }}：{{ os.remainCacheSpace }} /
                         {{ os.totalCacheSpace }}
                       </div>
@@ -349,11 +199,7 @@
               </el-row>
             </div>
           </el-popover>
-          <el-popover
-            v-if="guideStep"
-            :placement="guideStep[5].placement"
-            width="250"
-            trigger="manual"
+          <el-popover v-if="guideStep" :placement="guideStep[5].placement" width="250" trigger="manual"
             v-model="guideStep[5].show">
             <div class="guide_box">
               <div class="guide_title">
@@ -361,92 +207,44 @@
               </div>
               <div class="guide_desc">{{ $t(`guide.step6`) }}</div>
               <div class="guide_btns">
-                <el-button
-                  @click="exitGuide"
-                  class="guide_btn1"
-                  size="mini"
-                  type="text"
-                  >{{ $t('guide.skip') }}</el-button
-                >
-                <el-button
-                  v-if="parseInt(currentStep) > 0"
-                  @click="prevStep"
-                  class="guide_btn1"
-                  size="mini"
-                  >{{ $t('guide.prev') }}</el-button
-                >
-                <el-button
-                  @click="nextStep"
-                  class="guide_btn2"
-                  size="mini"
-                  type="primary"
-                  >{{ currentStep == guideStep.length - 1 ? $t('guide.complete') : $t('guide.next') }}</el-button
-                >
+                <el-button @click="exitGuide" class="guide_btn1" size="mini" type="text">{{ $t('guide.skip')
+                }}</el-button>
+                <el-button v-if="parseInt(currentStep) > 0" @click="prevStep" class="guide_btn1" size="mini">{{
+                  $t('guide.prev') }}</el-button>
+                <el-button @click="nextStep" class="guide_btn2" size="mini" type="primary">{{ currentStep ==
+                  guideStep.length - 1 ? $t('guide.complete') : $t('guide.next') }}</el-button>
               </div>
             </div>
-            <div
-              slot="reference"
-              :class="{ guide_body: beginStep && currentStep == 5 }"
-              class="machines work"
+            <div slot="reference" :class="{ guide_body: beginStep && currentStep == 5 }" class="machines work"
               style="height: 120px;margin-top: 10px">
-              <el-table
-                :data="infoData"
-                max-height="120"
-                size="mini"
-                style="width: 100%"
-                :empty-text="$t('index.nodata')"
-                row-class-name="rowclass">
-                <el-table-column
-                  prop="gzz"
-                  :label="$t('main.tableMachine')"
-                  min-width="100">
+              <el-table :data="infoData" max-height="120" size="mini" style="width: 100%"
+                :empty-text="$t('index.nodata')" row-class-name="rowclass">
+                <el-table-column prop="gzz" :label="$t('main.tableMachine')" min-width="100">
                   <template slot-scope="scope">
                     {{ getPrintName(scope.row.PrinterID, true) }}
                   </template>
                 </el-table-column>
-                <el-table-column
-                  prop="status"
-                  :label="$t('main.tableState')"
-                  min-width="80">
+                <el-table-column prop="status" :label="$t('main.tableState')" min-width="80">
                   <template slot-scope="{}">{{ $t('main.tableOnline') }}</template>
                 </el-table-column>
-                <el-table-column
-                  prop="SerialNo"
-                  :label="$t('main.tableSerialNo')"
-                  min-width="80">
+                <el-table-column prop="SerialNo" :label="$t('main.tableSerialNo')" min-width="80">
                 </el-table-column>
-                <el-table-column
-                  prop="RibbonType"
-                  :label="$t('main.tableRibbonType')"
-                  min-width="80">
+                <el-table-column prop="RibbonType" :label="$t('main.tableRibbonType')" min-width="80">
                 </el-table-column>
-                <el-table-column
-                  align="center"
-                  prop="RibbonAmount"
-                  :label="$t('main.tableRibbonAmount')"
+                <el-table-column align="center" prop="RibbonAmount" :label="$t('main.tableRibbonAmount')"
                   min-width="100">
                   <template slot-scope="scope">
                     <EnergyBar
                       :percent="getRibbonPercent(scope.row.RibbonAmount, getRibbonAmount(scope.row.ModeName, scope.row.RibbonType))"
-                      :segments="10"
-                      :text="String(scope.row.RibbonAmount || 0)"
-                      :show-text="false"
-                      :gap="1"
+                      :segments="10" :text="String(scope.row.RibbonAmount || 0)" :show-text="false" :gap="1"
                       :border-radius="1">
                     </EnergyBar>
                   </template>
                 </el-table-column>
-                <el-table-column
-                  prop="PrinterType"
-                  :label="$t('main.tablePrinterType')"
-                  min-width="100">
+                <el-table-column prop="PrinterType" :label="$t('main.tablePrinterType')" min-width="100">
                   <template slot-scope="scope">
-                    <el-dropdown
-                      trigger="click"
-                      @command="(e) => handleMachineCommand(e, scope.row.PrinterID)">
-                      <span
-                        class="el-dropdown-link"
-                        style="color: #000; font-size: 12px">
+                    <el-dropdown trigger="click" @command="(e) => handleMachineCommand(e, scope.row.PrinterID)">
+                      <span class="el-dropdown-link" style="color: #000; font-size: 12px">
                         {{ scope.row.PrinterType }}<i class="el-icon-arrow-down el-icon--right"></i>
                       </span>
                       <el-dropdown-menu slot="dropdown">
@@ -456,37 +254,26 @@
                         <el-dropdown-item command="null">
                           <span style="color: #000; font-size: 12px">{{ $t('main.cancelSetting') }}</span>
                         </el-dropdown-item>
-                        <el-dropdown-item
-                          v-for="item in _PrinterTypeList"
-                          :key="item.value"
-                          :command="item.value">
+                        <el-dropdown-item v-for="item in _PrinterTypeList" :key="item.value" :command="item.value">
                           <span style="color: #000; font-size: 12px">{{ item.label }}</span>
                         </el-dropdown-item>
                       </el-dropdown-menu>
                     </el-dropdown>
                   </template>
                 </el-table-column>
-                <el-table-column
-                  align="center"
-                  prop="PrinterRemaCapa"
-                  :label="$t('main.tablePrinterRemaCapa')"
+                <el-table-column align="center" prop="PrinterRemaCapa" :label="$t('main.tablePrinterRemaCapa')"
                   min-width="100">
                   <template slot-scope="scope">
                     <EnergyBar
                       :percent="safePercent((scope.row.PrinterRemaCapa > 0 ? scope.row.PrinterRemaCapa : 0), 100)"
-                      :segments="(os.CardsoonModel&&os.CardsoonModel.toLowerCase() === 'th80n' ? 6 : 8)"
-                      :showText="true"
-                      :text="String(scope.row.PrinterRemaCapa > 0 ? scope.row.PrinterRemaCapa : 0)" />
+                      :segments="(os.CardsoonModel && os.CardsoonModel.toLowerCase() === 'th80n' ? 6 : 8)"
+                      :showText="true" :text="String(scope.row.PrinterRemaCapa > 0 ? scope.row.PrinterRemaCapa : 0)" />
                   </template>
                 </el-table-column>
               </el-table>
             </div>
           </el-popover>
-          <el-popover
-            v-if="guideStep"
-            :placement="guideStep[6].placement"
-            width="250"
-            trigger="manual"
+          <el-popover v-if="guideStep" :placement="guideStep[6].placement" width="250" trigger="manual"
             v-model="guideStep[6].show">
             <div class="guide_box">
               <div class="guide_title">
@@ -494,147 +281,91 @@
               </div>
               <div class="guide_desc">{{ $t(`guide.step7`) }}</div>
               <div class="guide_btns">
-                <el-button
-                  @click="exitGuide"
-                  class="guide_btn1"
-                  size="mini"
-                  type="text"
-                  >{{ $t('guide.skip') }}</el-button
-                >
-                <el-button
-                  v-if="parseInt(currentStep) > 0"
-                  @click="prevStep"
-                  class="guide_btn1"
-                  size="mini"
-                  >{{ $t('guide.prev') }}</el-button
-                >
-                <el-button
-                  @click="nextStep"
-                  class="guide_btn2"
-                  size="mini"
-                  type="primary"
-                  >{{ currentStep == guideStep.length - 1 ? $t('guide.complete') : $t('guide.next') }}</el-button
-                >
+                <el-button @click="exitGuide" class="guide_btn1" size="mini" type="text">{{ $t('guide.skip')
+                }}</el-button>
+                <el-button v-if="parseInt(currentStep) > 0" @click="prevStep" class="guide_btn1" size="mini">{{
+                  $t('guide.prev')
+                }}</el-button>
+                <el-button @click="nextStep" class="guide_btn2" size="mini" type="primary">{{ currentStep ==
+                  guideStep.length - 1
+                  ? $t('guide.complete') : $t('guide.next') }}</el-button>
               </div>
             </div>
-            <div
-              slot="reference"
-              :class="{ guide_body: beginStep && currentStep == 6 }">
-              <el-tabs
-                v-model="activeName"
+            <div slot="reference" :class="{ guide_body: beginStep && currentStep == 6 }">
+              <el-tabs v-model="activeName"
                 style="background-color: #fff; padding-bottom: 20px; max-height: 240px; margin-top: 10px 20px">
-                <el-tab-pane
-                  :label="$t(`index.workList`)"
-                  name="first">
+                <el-tab-pane :label="$t(`index.workList`)" name="first">
                   <div class="work worklist">
-                    <el-table
-                      height="200"
-                      :data="tasks"
-                      style="width: 100%"
-                      size="mini"
-                      :empty-text="$t('index.nodata')"
-                      :row-class-name="rowClassName"
-                      :row-key="row => row.JobID || row.AssUuid"
-                      :tree-props="{ children: 'children' }">
-                      <el-table-column
-                        label="#"
-                        width="50">
+                    <el-table height="200" :data="tasks" style="width: 100%" size="mini"
+                      :empty-text="$t('index.nodata')" :row-class-name="rowClassName"
+                      :row-key="row => row.JobID || row.AssUuid" :tree-props="{ children: 'children' }">
+                      <el-table-column label="#" width="50">
                         <template slot-scope="scope">
                           <span v-if="!scope.row.AssUuid">{{ parentIndex(scope.row) }}</span>
                         </template>
                       </el-table-column>
-                      <el-table-column
-                        prop="jId"
-                        :label="$t('index.wordID')"
-                        min-width="85">
+                      <el-table-column prop="jId" :label="$t('index.wordID')" min-width="85">
                         <template slot-scope="scope">
                           <span v-if="!scope.row.AssUuid">{{ scope.row.jId }}</span>
                           <span v-else></span>
                         </template>
                       </el-table-column>
-                      <el-table-column
-                        :label="$t('index.wordOrigin')"
-                        min-width="50">
+                      <el-table-column :label="$t('index.wordOrigin')" min-width="50">
                         <template slot-scope="scope">
                           <span v-if="!scope.row.AssUuid">{{ scope.row.DataSource }}</span>
                           <span v-else></span>
                         </template>
                       </el-table-column>
-                      <el-table-column
-                        :label="$t('index.wordSpace')"
-                        min-width="45">
+                      <el-table-column :label="$t('index.wordSpace')" min-width="45">
                         <template slot-scope="scope">
                           <span v-if="!scope.row.AssUuid">{{ getPrintName(scope.row.PrinterID, true) }}</span>
                           <span v-else>{{ getPrintName(scope.row.ParentPrinterID || scope.row.PrinterID, true) }}</span>
                         </template>
                       </el-table-column>
-                      <el-table-column
-                        :label="$t('main.USBType')"
-                        min-width="55">
+                      <el-table-column :label="$t('main.USBType')" min-width="55">
                         <template slot-scope="scope">
-                          {{ !scope.row.AssUuid ? scope.row.PrinterType : (scope.row.ParentPrinterType || scope.row.PrinterType) }}
+                          {{ !scope.row.AssUuid ? scope.row.PrinterType : (scope.row.ParentPrinterType ||
+                            scope.row.PrinterType) }}
                         </template>
                       </el-table-column>
-                      <el-table-column
-                        min-width="60"
-                        :label="$t('main.TaskCapacity')">
+                      <el-table-column min-width="60" :label="$t('main.TaskCapacity')">
                         <template slot-scope="scope">
                           {{ !scope.row.AssUuid ? scope.row.TaskCapacity : (scope.row.ParentTaskCapacity || '') }}
                         </template>
                       </el-table-column>
-                      <el-table-column
-                        v-if="false"
-                        prop="DataDir"
-                        :label="$t('main.taskFile')">
+                      <el-table-column v-if="false" prop="DataDir" :label="$t('main.taskFile')">
                       </el-table-column>
-                      <el-table-column
-                        :label="$t('index.createTime')"
-                        min-width="75">
+                      <el-table-column :label="$t('index.createTime')" min-width="75">
                         <template slot-scope="scope">
                           {{ !scope.row.AssUuid ? scope.row.CreateTime : (scope.row.StartTime || '') }}
                         </template>
                       </el-table-column>
-                      <el-table-column
-                        v-if="false"
-                        prop="usb_version"
-                        :label="$t('main.USBVersion')"
-                        :filters="[
-                          { text: '2.0', value: 2 },
-                          { text: '3.0', value: 3 }
-                        ]"
-                        :filter-method="filterHandler">
+                      <el-table-column v-if="false" prop="usb_version" :label="$t('main.USBVersion')" :filters="[
+                        { text: '2.0', value: 2 },
+                        { text: '3.0', value: 3 }
+                      ]" :filter-method="filterHandler">
                       </el-table-column>
-                      <el-table-column
-                        :label="$t('index.finishedTime')"
-                        min-width="75">
+                      <el-table-column :label="$t('index.finishedTime')" min-width="75">
                         <template slot-scope="scope">
                           {{ !scope.row.AssUuid ? scope.row.FinishTime : (scope.row.FinishTime || '') }}
                         </template>
                       </el-table-column>
-                      <el-table-column
-                        min-width="40"
-                        :label="$t('index.finishedNumber')">
+                      <el-table-column min-width="40" :label="$t('index.finishedNumber')">
                         <template slot-scope="scope">
                           <span v-if="!scope.row.AssUuid">{{ scope.row.JobCompletion }}</span>
                           <span v-else>-</span>
                         </template>
                       </el-table-column>
-                      <el-table-column
-                        :label="$t('index.state')"
-                        width="135">
+                      <el-table-column :label="$t('index.state')" width="135">
                         <template slot-scope="scope">
                           <template v-if="!scope.row.AssUuid">
-                            <el-dropdown
-                              trigger="click"
-                              @command="(e) => handleTaskCommand(e, scope.row.JobID)"
+                            <el-dropdown trigger="click" @command="(e) => handleTaskCommand(e, scope.row.JobID)"
                               :disabled="scope.row.JobStatus != 'Fail'">
-                              <span
-                                class="el-dropdown-link"
-                                style="color: #000; font-size: 12px">
-                                {{ jobState(scope.row.JobStatus) }}<b v-if="scope.row.JobStatus === 'Copying'" style="margin-left: 3px;">{{ scope.row.CopySpeed ? Math.ceil(parseFloat(scope.row.CopySpeed)*10)/10 : '0.0' }}MB/s</b>
-                                <i
-                                  class="el-icon-arrow-down el-icon--right"
-                                  v-if="scope.row.JobStatus == 'Fail'"></i>
+                              <span class="el-dropdown-link" style="color: #000; font-size: 12px">
+                                {{ jobState(scope.row.JobStatus) }}<b v-if="scope.row.JobStatus === 'Copying'"
+                                  style="margin-left: 3px;">{{ scope.row.CopySpeed ?
+                                    Math.ceil(parseFloat(scope.row.CopySpeed) * 10) / 10 : '0.0' }}MB/s</b>
+                                <i class="el-icon-arrow-down el-icon--right" v-if="scope.row.JobStatus == 'Fail'"></i>
                               </span>
                               <el-dropdown-menu slot="dropdown">
                                 <el-dropdown-item command="refresh">
@@ -645,22 +376,14 @@
                                 </el-dropdown-item>
                               </el-dropdown-menu>
                             </el-dropdown>
-                            <el-progress
-                              :color="customColors"
-                              :width="45"
-                              define-back-color="#ebeef5"
-                              :stroke-width="3"
-                              :percentage="Math.max(0, Math.min(100, Number(String(scope.row.TaskPercentage || '0').replace('%','')) || 0))"
+                            <el-progress :color="customColors" :width="45" define-back-color="#ebeef5" :stroke-width="3"
+                              :percentage="Math.max(0, Math.min(100, Number(String(scope.row.TaskPercentage || '0').replace('%', '')) || 0))"
                               v-if="scope.row.JobStatus == `Copying`"></el-progress>
                           </template>
                           <template v-else>
                             {{ jobState(scope.row.TaskStatus) }}
-                            <el-progress
-                              :color="customColors"
-                              :width="45"
-                              define-back-color="#ebeef5"
-                              :stroke-width="3"
-                              :percentage="Math.max(0, Math.min(100, Number(String(scope.row.TaskPercentage || '0').replace('%','')) || 0))"
+                            <el-progress :color="customColors" :width="45" define-back-color="#ebeef5" :stroke-width="3"
+                              :percentage="Math.max(0, Math.min(100, Number(String(scope.row.TaskPercentage || '0').replace('%', '')) || 0))"
                               v-if="scope.row.TaskStatus == `Copying`"></el-progress>
                           </template>
                         </template>
@@ -668,42 +391,27 @@
                     </el-table>
                   </div>
                 </el-tab-pane>
-                <el-tab-pane
-                  :label="$t(`index.curLog`)"
-                  name="second">
+                <el-tab-pane :label="$t(`index.curLog`)" name="second">
                   <div class="work">
                     <div class="w_title">
                       <div class="w_right">
-                        <el-button
-                          type="text"
-                          icon="el-icon-document-copy"
-                          v-if="isAdmin"
-                          @click="getWLogData()">
+                        <el-button type="text" icon="el-icon-document-copy" v-if="isAdmin" @click="getWLogData()">
                           {{ $t('index.openHistoryLog') }}
                         </el-button>
                       </div>
                     </div>
-                    <div
-                      class="c_log"
-                      v-html="log"></div></div
-                ></el-tab-pane>
+                    <div class="c_log" v-html="log"></div>
+                  </div>
+                </el-tab-pane>
               </el-tabs>
             </div>
           </el-popover>
           <s-footer></s-footer>
         </div>
       </div>
-      <div
-        :span="3"
-        style="height: 100%; width: 164px">
-        <div
-          class="grid-content bg-purple right"
-          style="overflow: hidden">
-          <el-popover
-            v-if="guideStep"
-            :placement="guideStep[3].placement"
-            width="250"
-            trigger="manual"
+      <div :span="3" style="height: 100%; width: 164px">
+        <div class="grid-content bg-purple right" style="overflow: hidden">
+          <el-popover v-if="guideStep" :placement="guideStep[3].placement" width="250" trigger="manual"
             v-model="guideStep[3].show">
             <div class="guide_box">
               <div class="guide_title">
@@ -711,101 +419,48 @@
               </div>
               <div class="guide_desc">{{ $t(`guide.step4`) }}</div>
               <div class="guide_btns">
-                <el-button
-                  @click="exitGuide"
-                  class="guide_btn1"
-                  size="mini"
-                  type="text"
-                  >{{ $t('guide.skip') }}</el-button
-                >
-                <el-button
-                  v-if="parseInt(currentStep) > 0"
-                  @click="prevStep"
-                  class="guide_btn1"
-                  size="mini"
-                  >{{ $t('guide.prev') }}</el-button
-                >
-                <el-button
-                  @click="nextStep"
-                  class="guide_btn2"
-                  size="mini"
-                  type="primary"
-                  >{{ currentStep == guideStep.length - 1 ? $t('guide.complete') : $t('guide.next') }}</el-button
-                >
+                <el-button @click="exitGuide" class="guide_btn1" size="mini" type="text">{{ $t('guide.skip')
+                }}</el-button>
+                <el-button v-if="parseInt(currentStep) > 0" @click="prevStep" class="guide_btn1" size="mini">{{
+                  $t('guide.prev') }}</el-button>
+                <el-button @click="nextStep" class="guide_btn2" size="mini" type="primary">{{ currentStep ==
+                  guideStep.length
+                  - 1 ? $t('guide.complete') : $t('guide.next') }}</el-button>
               </div>
             </div>
-            <div
-              class="title"
-              slot="reference"
-              :class="{ guide_body: beginStep && currentStep == 3 }">
+            <div class="title" slot="reference" :class="{ guide_body: beginStep && currentStep == 3 }">
               {{ $t('index.notice') }}
             </div>
           </el-popover>
 
-          <template v-for="(item,index) of errList">
-            <warnCard
-              :key="index"
-              :data="item"
-              @ok="okWarning"
-              v-if="item.show" />
+          <template v-for="(item, index) of errList">
+            <warnCard :key="index" :data="item" @ok="okWarning" v-if="item.show" />
           </template>
         </div>
       </div>
     </div>
     <div v-if="dialogVisible">
-      <el-dialog
-        @close="initData"
-        :visible.sync="dialogVisible"
-        width="1200px"
-        :destroy-on-close="true"
-        :close-on-click-modal="false"
-        :title="$t('index.newWork')">
-        <work
-          :dice="DualSide == 1 ? 2 : 1"
-          @jobPost="closeWork"
-          @addError="addError"
-          :isNew="isNew"
-          :saveWorkList="saveWorkList"
-          :printerList="infoData"
-          :shareDisk="shareDisk"
-          :isCopy="isLocal"
-          :filterPassedType="filterPassedType"
-          :sizeType="_PrinterTypeList">
+      <el-dialog @close="initData" :visible.sync="dialogVisible" width="1200px" top="20px" :destroy-on-close="true"
+        :close-on-click-modal="false" :title="$t('index.newWork')">
+        <work ref="work" :dice="DualSide == 1 ? 2 : 1" @jobPost="closeWork" @addError="addError" :isNew="isNew"
+          :saveWorkList="saveWorkList" :printerList="infoData" :shareDisk="shareDisk" :isCopy="isLocal"
+          :filterPassedType="filterPassedType" :sizeType="_PrinterTypeList">
         </work>
       </el-dialog>
     </div>
     <div v-if="dialogNetVisible">
-      <el-dialog
-        :visible.sync="dialogNetVisible"
-        width="1200px"
-        :destroy-on-close="true"
-        :close-on-click-modal="false"
-        :title="$t('index.newWork')">
-        <worknet
-          :dice="DualSide == 1 ? 2 : 1"
-          @jobPost="closeNetWork"
-          :printerList="infoData">
+      <el-dialog :visible.sync="dialogNetVisible" width="1200px" top="20px" :destroy-on-close="true"
+        :close-on-click-modal="false" :title="$t('index.newWork')">
+        <worknet :dice="DualSide == 1 ? 2 : 1" @jobPost="closeNetWork" :printerList="infoData">
         </worknet>
       </el-dialog>
     </div>
-    <el-dialog
-      width="1040px"
-      :title="$t('index.entireLog')"
-      :visible.sync="dialogWholeLog">
-      <div
-        class="wLog"
-        v-html="wlog"
-        style="text-align: left"></div>
+    <el-dialog width="1040px" :title="$t('index.entireLog')" :visible.sync="dialogWholeLog">
+      <div class="wLog" v-html="wlog" style="text-align: left"></div>
     </el-dialog>
 
     <!-- 开始用户引导 -->
-    <el-dialog
-      class="guide_dialog"
-      top="30vh"
-      :show-close="false"
-      title="温馨提示"
-      :visible.sync="showStep"
-      width="350px"
+    <el-dialog class="guide_dialog" top="30vh" :show-close="false" title="温馨提示" :visible.sync="showStep" width="350px"
       :close-on-click-modal="false">
       <div class="start_box">
         <div class="start_content">欢迎使用卡树自动拷贝打印系统，我们将引导您使用本系统，请按照提示学习操作！</div>
@@ -813,11 +468,7 @@
           <el-checkbox v-model="hideStep">本次引导结束，不再进入</el-checkbox>
         </div>
         <div class="start_btn">
-          <el-button
-            @click="startStep"
-            type="primary"
-            >开始引导</el-button
-          >
+          <el-button @click="startStep" type="primary">开始引导</el-button>
         </div>
       </div>
     </el-dialog>
@@ -1137,12 +788,12 @@ export default {
     ipcRenderer.send('open-program')
     this.guideStep = JSON.parse(localStorage.getItem('guideStep'))
     this.currentStep = localStorage.getItem('currentStep')
-    if ((!localStorage.getItem('hideStep') || localStorage.getItem('hideStep') == 0)&&this.currentStep>-1) this.showStep = true
+    if ((!localStorage.getItem('hideStep') || localStorage.getItem('hideStep') == 0) && this.currentStep > -1) this.showStep = true
     setTimeout(() => {
       this.doingWorkStatus = false
     }, 10000)
     this.timer2 = setInterval(this.getPrintData, this.refreshTime2)
-    console.log(this.refreshTime1,this.refreshTime2)
+    console.log(this.refreshTime1, this.refreshTime2)
   },
   beforeDestroy() {
     this.stopTimer()
@@ -1202,7 +853,7 @@ export default {
           this.os.totalCacheSpace = res.data.totalCacheSpace
           let remain = this.os.remainCacheSpace.replace(' GB', '')
           let total = res.data.totalCacheSpace.replace(' GB', '')
-          this.os.cacheSpaceNum = (parseFloat(remain) / parseFloat(total))*100
+          this.os.cacheSpaceNum = (parseFloat(remain) / parseFloat(total)) * 100
           this.os.ram = res.data.CPMemory
           this.os.CardsoonModel = res.data.systemName
           this.os.hostname = res.data.CPName
@@ -1353,12 +1004,12 @@ export default {
           for (let item of this.tasks) {
             if (item.TaskPercentage === '100%') total2++
           }
-          if (total1!==total2) {
+          if (total1 !== total2) {
             setTimeout(() => {
               this.getPrintData()
             }, 3000);
           }
-          
+
           if (callback) {
             this.runCheckState() //首次先check一遍
           }
@@ -1376,9 +1027,9 @@ export default {
         .then((res) => {
           let infoData = [...this.infoData]
           this.infoData = res.data.printerList.map((item, index) => {
-            let child = {...item}
+            let child = { ...item }
             console.log('childchildchild', infoData[index], child)
-            if (infoData[index]&&!child.ModeName&&!child.SerialNo) {
+            if (infoData[index] && !child.ModeName && !child.SerialNo) {
               child = infoData[index]
             }
             return {
@@ -1426,7 +1077,7 @@ export default {
           this.DualSide = DualSide
         })
         .catch((e) => {
-          
+
         })
     },
     // 清除报错通知
@@ -1756,13 +1407,14 @@ export default {
       // 新建任务时重置文件列表与网络认证状态，避免上一次残留导致卡顿
       this.$nextTick(() => {
         const workRef = this.$refs.work
-        if (workRef && workRef.$refs && workRef.$refs.files && workRef.$refs.files.reset) {
-          workRef.$refs.files.reset()
+        const workMain = workRef ? workRef.$refs.workMain : null
+        if (workMain && workMain.$refs && workMain.$refs.files && workMain.$refs.files.reset) {
+          workMain.$refs.files.reset()
         }
-        if (workRef) {
-          workRef.networkAuthVisible = false
-          workRef.networkAuthPaths = []
-          workRef.submitLoading = false
+        if (workMain) {
+          workMain.networkAuthVisible = false
+          workMain.networkAuthPaths = []
+          workMain.submitLoading = false
         }
       })
     },
@@ -1784,32 +1436,32 @@ export default {
     },
     getPrinterRemaCapaAmount(ModeName) {
       // console.log('PrinterRemaCapa', this.ribbonList[ModeName].PrinterRemaCapa)
-      return this.ribbonList[ModeName]&&this.ribbonList[ModeName].PrinterRemaCapa ? this.ribbonList[ModeName].PrinterRemaCapa : 0
+      return this.ribbonList[ModeName] && this.ribbonList[ModeName].PrinterRemaCapa ? this.ribbonList[ModeName].PrinterRemaCapa : 0
     },
     getRibbonAmount(ModeName, RibbonType) {
-      return this.ribbonList[ModeName]&&this.ribbonList[ModeName][RibbonType] ? this.ribbonList[ModeName][RibbonType] : 0
+      return this.ribbonList[ModeName] && this.ribbonList[ModeName][RibbonType] ? this.ribbonList[ModeName][RibbonType] : 0
     },
     parseNumericValue(value) {
       if (value === null || value === undefined || value === '') return 0
-      
+
       // 转换为字符串处理
       let str = String(value).trim()
-      
+
       // 移除逗号分隔符
       str = str.replace(/,/g, '')
-      
+
       // 处理科学计数法 (如 1.23e+5, 1.23E-2)
       if (/[eE]/.test(str)) {
         const num = parseFloat(str)
         return isFinite(num) ? num : 0
       }
-      
+
       // 处理带符号的数值 (如 +123, -456)
       if (/^[+-]/.test(str)) {
         const num = parseFloat(str)
         return isFinite(num) ? num : 0
       }
-      
+
       // 普通数值转换
       const num = parseFloat(str)
       return isFinite(num) ? num : 0
@@ -1963,7 +1615,7 @@ export default {
       return [
         ...this.CapSettings.map((item) => {
           return {
-            value: item.disksize,
+            value: item.value,
             label: item.disksize + '|' + item.usbtype
           }
         })
@@ -2014,14 +1666,17 @@ export default {
   max-height: 600px;
   overflow: auto;
 }
+
 h1,
 h2 {
   font-weight: normal;
 }
+
 ul {
   list-style-type: none;
   padding: 0;
 }
+
 // li {
 //   display: inline-block;
 //   margin: 0 10px;
@@ -2029,6 +1684,7 @@ ul {
 a {
   color: #42b983;
 }
+
 .left {
   background-color: #e8e7ee;
   height: 100%;
@@ -2037,10 +1693,12 @@ a {
   box-sizing: border-box;
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
+
   .title {
     color: #999999;
     font-size: 28px;
   }
+
   .card {
     background-color: #f5f5f5;
     height: 50px;
@@ -2062,29 +1720,36 @@ a {
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   overflow-y: hidden;
+
   &::-webkit-scrollbar {
     /*滚动条整体样式*/
-    width: 10px; /*高宽分别对应横竖滚动条的尺寸*/
+    width: 10px;
+    /*高宽分别对应横竖滚动条的尺寸*/
     height: 1px;
   }
+
   &::-webkit-scrollbar-thumb {
     /*滚动条里面小方块*/
     border-radius: 10px;
     box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
     background: #c7c7cb;
   }
+
   &::-webkit-scrollbar-track {
     /*滚动条里面轨道*/
     box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
     border-radius: 10px;
     background: #ededed;
   }
+
   .title {
     font-size: 32px;
+
     .add {
       float: left;
     }
   }
+
   .brief {
     height: 180px;
     width: 100%;
@@ -2100,27 +1765,32 @@ a {
       margin-top: 12px;
       font-size: 12px;
     }
+
     .b_title {
       position: absolute;
       font-weight: bold;
     }
+
     .b_left {
       position: relative;
       height: 100%;
       border-right: #b8b8b8 solid 1px;
       text-align: left;
     }
+
     .b_mid {
       position: relative;
       height: 100%;
       text-align: left;
       //border-right: #B8B8B8 solid 1px;
     }
+
     .b_right {
       position: relative;
       height: 100%;
     }
   }
+
   .work {
     // height: 180px;
     width: 100%;
@@ -2130,10 +1800,12 @@ a {
     box-sizing: border-box;
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
+
     .w_title {
       font-size: 24px;
       font-weight: bold;
       text-align: left;
+
       .w_right {
         position: absolute;
         right: 20px;
@@ -2142,15 +1814,18 @@ a {
 
     &::-webkit-scrollbar {
       /*滚动条整体样式*/
-      width: 10px; /*高宽分别对应横竖滚动条的尺寸*/
+      width: 10px;
+      /*高宽分别对应横竖滚动条的尺寸*/
       height: 1px;
     }
+
     &::-webkit-scrollbar-thumb {
       /*滚动条里面小方块*/
       border-radius: 10px;
       box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
       background: #c7c7cb;
     }
+
     &::-webkit-scrollbar-track {
       /*滚动条里面轨道*/
       box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
@@ -2159,6 +1834,7 @@ a {
     }
   }
 }
+
 .right {
   background-color: #c8cfd7;
   height: 100%;
@@ -2168,10 +1844,12 @@ a {
   box-sizing: border-box;
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
+
   .title {
     color: #999999;
     font-size: 28px;
   }
+
   .log {
     padding: 20px;
     font-size: 18px;
@@ -2190,23 +1868,28 @@ a {
   text-align: left;
   color: #999999;
   overflow-y: auto;
+
   &::-webkit-scrollbar {
     /*滚动条整体样式*/
-    width: 10px; /*高宽分别对应横竖滚动条的尺寸*/
+    width: 10px;
+    /*高宽分别对应横竖滚动条的尺寸*/
     height: 1px;
   }
+
   &::-webkit-scrollbar-thumb {
     /*滚动条里面小方块*/
     border-radius: 10px;
     box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
     background: #c7c7cb;
   }
+
   &::-webkit-scrollbar-track {
     /*滚动条里面轨道*/
     box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
     border-radius: 10px;
     background: #ededed;
   }
+
   /deep/ p {
     margin: 0;
     font-size: 14px;
@@ -2215,22 +1898,26 @@ a {
 }
 
 /* 子任务行紧凑显示 */
-/deep/ .el-table__row.ass-row > td {
+/deep/ .el-table__row.ass-row>td {
   padding-top: 2px !important;
   padding-bottom: 2px !important;
 }
+
 /deep/ .el-table__row.ass-row .cell {
   line-height: 18px !important;
 }
+
 /* 去除树结构行默认左侧过大缩进，让箭头与内容更紧凑 */
 /deep/ .el-table__expand-icon {
   margin-right: 2px;
 }
+
 /* 缩小树结构图标列宽与缩进 */
 /deep/ .el-table__indent {
   padding-left: 8px !important;
 }
-/deep/ .el-table__expand-icon > i {
+
+/deep/ .el-table__expand-icon>i {
   font-size: 12px;
 }
 
@@ -2239,11 +1926,13 @@ a {
   display: flex;
   align-items: center;
   gap: 10px;
+
   .link {
     color: blue;
     cursor: pointer;
   }
 }
+
 /deep/ .el-dialog__body {
   padding: 10px 20px !important;
 }
@@ -2255,30 +1944,35 @@ a {
 /deep/ .el-dialog {
   margin-top: 3vh !important;
 }
+
 /* 开始引导 */
 .guide_dialog {
   /deep/ .el-dialog {
     margin-top: 25vh !important;
   }
 }
+
 .start_box {
   .start_content {
     font-size: 15px;
     line-height: 24px;
   }
+
   .start_hide {
     padding: 40px 0 10px;
   }
 }
 
-.worklist{
+.worklist {
   .el-table {
     height: calc(100vh - 520px) !important;
+
     /deep/ .el-table__body-wrapper {
       height: calc(100% - 48px) !important;
-      overflow: scroll!important;
+      overflow: scroll !important;
     }
   }
+
   ::-webkit-scrollbar-track-piece {
     background: #d3dce6;
   }
@@ -2300,9 +1994,10 @@ a {
   gap: 8px;
   padding: 2px 6px;
   border-radius: 10px;
-  background: rgba(255,255,255,.35);
+  background: rgba(255, 255, 255, .35);
   backdrop-filter: blur(3px);
 }
+
 +.ribbon-badge {
   min-width: 30px;
   height: 18px;
@@ -2313,7 +2008,7 @@ a {
   color: #bfe3ff;
   font-size: 12px;
   text-align: center;
-  box-shadow: 0 2px 8px rgba(0,0,0,.15), inset 0 0 8px rgba(120,180,255,.25);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .15), inset 0 0 8px rgba(120, 180, 255, .25);
 }
 </style>
 <style>

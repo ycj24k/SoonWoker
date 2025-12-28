@@ -1,24 +1,18 @@
 <template>
   <div class="screen-recorder">
-    <el-tooltip 
-      :content="isRecording ? $t('recorder.stopRecording') : $t('recorder.startRecording')" 
-      placement="top">
-      <el-button
-        size="medium"
-        :type="isRecording ? 'danger' : 'primary'"
-        :icon="isRecording ? 'el-icon-video-pause' : 'el-icon-video-camera'"
-        circle
-        @click="toggleRecording"
-        :loading="loading"
-        class="record-btn"
-      >
-      </el-button>
-    </el-tooltip>
-    
+    <template v-if="!statusOnly">
+      <el-tooltip :content="isRecording ? $t('recorder.stopRecording') : $t('recorder.startRecording')" placement="top">
+        <el-button size="medium" :type="isRecording ? 'danger' : 'primary'"
+          :icon="isRecording ? 'el-icon-video-pause' : 'el-icon-video-camera'" circle @click="toggleRecording"
+          :loading="loading" class="record-btn">
+        </el-button>
+      </el-tooltip>
+    </template>
+
     <!-- 录制状态指示器 -->
-    <div v-if="isRecording" class="recording-indicator">
+    <div v-if="isRecording" class="recording-indicator" :class="{ 'status-only': statusOnly }">
       <span class="recording-dot"></span>
-      <span class="recording-text">{{ recordingTime }}</span>
+      <span class="recording-text">{{ statusOnly ? '录制中...' : recordingTime }}</span>
     </div>
   </div>
 </template>
@@ -32,6 +26,10 @@ export default {
     taskId: {
       type: String,
       default: ''
+    },
+    statusOnly: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -44,7 +42,8 @@ export default {
       recordingTime: '00:00',
       timer: null,
       stream: null,
-      currentTaskId: '' // 录屏开始时的任务ID
+      currentTaskId: '', // 录屏开始时的任务ID
+      autoSave: true // 是否在停止时保存
     };
   },
   methods: {
@@ -56,13 +55,14 @@ export default {
       }
     },
 
-    async startRecording() {
+    async startRecording(options = {}) {
       this.loading = true;
-      
+      this.autoSave = true;
+
       try {
         // 调用主进程开始录制
         const result = await ipcRenderer.invoke('start-recording');
-        
+
         if (!result.success) {
           this.$message.error(result.message);
           this.loading = false;
@@ -86,7 +86,7 @@ export default {
 
         this.stream = stream;
         this.recordedChunks = [];
-        
+
         // 创建MediaRecorder
         this.mediaRecorder = new MediaRecorder(stream, {
           mimeType: 'video/webm'
@@ -99,7 +99,10 @@ export default {
         };
 
         this.mediaRecorder.onstop = async () => {
-          await this.saveRecording();
+          if (this.autoSave) {
+            await this.saveRecording(options.savePath);
+          }
+          this.recordedChunks = [];
         };
 
         // 开始录制
@@ -109,10 +112,10 @@ export default {
         // 保存录屏开始时的任务ID
         this.currentTaskId = this.taskId || '';
         this.startTimer();
-        
+
         this.$message.success(this.$t('recorder.recordingStarted') || '开始录制');
         this.$emit('recording-started');
-        
+
       } catch (error) {
         console.error('启动录制失败:', error);
         this.$message.error(this.$t('recorder.startFailed') || '启动录制失败');
@@ -121,24 +124,25 @@ export default {
       }
     },
 
-    async stopRecording() {
+    async stopRecording(save = true) {
       this.loading = true;
-      
+      this.autoSave = save;
+
       try {
         if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
           this.mediaRecorder.stop();
         }
-        
+
         // 停止所有轨道
         if (this.stream) {
           this.stream.getTracks().forEach(track => track.stop());
           this.stream = null;
         }
-        
+
         this.isRecording = false;
         this.stopTimer();
         this.$emit('recording-stopped');
-        
+
       } catch (error) {
         console.error('停止录制失败:', error);
         this.$message.error(this.$t('recorder.stopFailed') || '停止录制失败');
@@ -147,7 +151,12 @@ export default {
       }
     },
 
-    async saveRecording() {
+    async cancelRecording() {
+      await this.stopRecording(false);
+      this.$message.info('录制已取消');
+    },
+
+    async saveRecording(customPath) {
       if (this.recordedChunks.length === 0) {
         return;
       }
@@ -162,10 +171,10 @@ export default {
         const reader = new FileReader();
         reader.onloadend = async () => {
           const base64data = reader.result;
-          
-          // 发送到主进程保存，传递任务ID
-          const result = await ipcRenderer.invoke('stop-recording', base64data, this.currentTaskId);
-          
+
+          // 发送到主进程保存，传递任务ID和可选路径
+          const result = await ipcRenderer.invoke('stop-recording', base64data, this.currentTaskId, customPath);
+
           if (result.success) {
             this.$message.success(this.$t('recorder.savedSuccess') || `录制已保存: ${result.fileName}`);
             this.$emit('recording-saved', result);
@@ -174,7 +183,7 @@ export default {
           }
         };
         reader.readAsDataURL(blob);
-        
+
       } catch (error) {
         console.error('保存录制失败:', error);
         this.$message.error(this.$t('recorder.saveFailed') || '保存录制失败');
@@ -252,9 +261,12 @@ export default {
 }
 
 @keyframes blink {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.3;
   }

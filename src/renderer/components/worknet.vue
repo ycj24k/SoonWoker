@@ -13,17 +13,8 @@
             </el-col>
             <el-col :span="14">
               <div class="grid-content bg-purple">
-                <el-select
-                  :placeholder="$t('work.pleaseSelect')"
-                  style="width: 160px"
-                  v-model="size_form"
-                >
-                  <el-option
-                    v-for="item in size_type"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value"
-                  >
+                <el-select :placeholder="$t('work.pleaseSelect')" style="width: 160px" v-model="size_form">
+                  <el-option v-for="item in size_type" :key="item.value" :label="item.label" :value="item.value">
                   </el-option>
                 </el-select>
               </div>
@@ -34,8 +25,8 @@
 						<template slot="prepend">
 							{{$t("work.sign")}}
 						</template>
-					</el-input>
-                    -->
+</el-input>
+-->
         </el-col>
         <el-col :span="6">
           <el-row :gutter="0">
@@ -48,17 +39,9 @@
             </el-col>
             <el-col :span="14">
               <div class="grid-content bg-purple">
-                <el-select
-                  :placeholder="$t('work.pleaseSelect')"
-                  style="float: left; margin-left: 10px"
-                  v-model="file_form"
-                >
-                  <el-option
-                    v-for="item in file_type"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value"
-                  >
+                <el-select :placeholder="$t('work.pleaseSelect')" style="float: left; margin-left: 10px"
+                  v-model="file_form">
+                  <el-option v-for="item in file_type" :key="item.value" :label="item.label" :value="item.value">
                   </el-option>
                 </el-select>
               </div>
@@ -76,17 +59,9 @@
             </el-col>
             <el-col :span="14">
               <div class="grid-content bg-purple">
-                <el-select
-                  :placeholder="$t('work.pleaseSelect')"
-                  v-model="type_form"
-                >
-                  <el-option
-                    v-for="item in type"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value"
-                    :disabled="item.disabled"
-                  >
+                <el-select :placeholder="$t('work.pleaseSelect')" v-model="type_form">
+                  <el-option v-for="item in type" :key="item.value" :label="item.label" :value="item.value"
+                    :disabled="item.disabled">
                   </el-option>
                 </el-select>
               </div>
@@ -94,25 +69,13 @@
           </el-row>
         </el-col>
         <el-col :span="6">
-          <el-popover
-            style="float: right"
-            placement="left"
-            width="600"
-            trigger="click"
-          >
+          <el-popover style="float: right" placement="left" width="600" trigger="click">
             <div>
               <el-form :label-position="'right'" label-width="250px">
                 <el-form-item :label="$t('work.better')">
-                  <el-select
-                    :placeholder="$t('work.pleaseSelect')"
-                    v-model="high_setting_form.priority"
-                  >
-                    <el-option
-                      v-for="item in high_setting.priority"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value"
-                    >
+                  <el-select :placeholder="$t('work.pleaseSelect')" v-model="high_setting_form.priority">
+                    <el-option v-for="item in high_setting.priority" :key="item.value" :label="item.label"
+                      :value="item.value">
                     </el-option>
                   </el-select>
                 </el-form-item>
@@ -124,44 +87,23 @@
 									</el-select>
 								</el-form-item>-->
                 <el-form-item :label="$t('work.startWorkSpace')">
-                  <el-select
-                    :placeholder="$t('work.pleaseSelect')"
-                    v-model="high_setting_form.target_work"
-                  >
-                    <el-option
-                      v-for="item in high_setting.target_work"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value"
-                    >
+                  <el-select :placeholder="$t('work.pleaseSelect')" v-model="high_setting_form.target_work">
+                    <el-option v-for="item in high_setting.target_work" :key="item.value" :label="item.label"
+                      :value="item.value">
                     </el-option>
                   </el-select>
                 </el-form-item>
                 <el-form-item :label="$t('work.ribbonType')">
-                  <el-select
-                    :placeholder="$t('work.pleaseSelect')"
-                    v-model="high_setting_form.color_type"
-                  >
-                    <el-option
-                      v-for="item in high_setting.color_type"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value"
-                    >
+                  <el-select :placeholder="$t('work.pleaseSelect')" v-model="high_setting_form.color_type">
+                    <el-option v-for="item in high_setting.color_type" :key="item.value" :label="item.label"
+                      :value="item.value">
                     </el-option>
                   </el-select>
                 </el-form-item>
                 <el-form-item :label="$t('work.formatFile')">
-                  <el-select
-                    :placeholder="$t('work.pleaseSelect')"
-                    v-model="high_setting_form.formatFile"
-                  >
-                    <el-option
-                      v-for="item in high_setting.formatFile"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value"
-                    >
+                  <el-select :placeholder="$t('work.pleaseSelect')" v-model="high_setting_form.formatFile">
+                    <el-option v-for="item in high_setting.formatFile" :key="item.value" :label="item.label"
+                      :value="item.value">
                     </el-option>
                   </el-select>
                 </el-form-item>
@@ -209,82 +151,47 @@
     </div>
     <el-row :gutter="20" style="margin-top: 10px">
       <el-col :span="12">
-        <el-switch
-          v-model="switch_cont"
-          :active-text="$t('work.addContent')"
-          style="float: left"
-        >
+        <el-switch v-model="switch_cont" :active-text="$t('work.addContent')" style="float: left">
         </el-switch>
       </el-col>
       <el-col :span="12">
-        <el-switch
-          v-model="switch_tag"
-          style="float: right"
-          :active-text="$t('work.addTag')"
-        >
+        <el-switch v-model="switch_tag" style="float: right" :active-text="$t('work.addTag')">
         </el-switch>
       </el-col>
     </el-row>
     <el-row :gutter="0" style="margin-top: 10px">
-      <el-col
-        :span="
-          switch_tag && switch_cont ? 12 : switch_tag && !switch_cont ? 0 : 24
-        "
-      >
+      <el-col :span="switch_tag && switch_cont ? 12 : switch_tag && !switch_cont ? 0 : 24
+        ">
         <div class="grid-content bg-purple">
           <div class="file">
             <el-row :gutter="20">
               <el-col :span="3">
-                <span
-                  style="
+                <span style="
                     font-size: 18px;
                     font-weight: 700;
                     height: 40px;
                     line-height: 40px;
                     text-align: left;
-                  "
-                  >{{ $t("work.contentTitle") }}</span
-                >
+                  ">{{ $t("work.contentTitle") }}</span>
               </el-col>
               <el-col :span="11">
-                <el-input
-                  v-model="juanbiao_form"
-                  :placeholder="$t('work.pleaseInput')"
-                  style="width: 200px; float: left"
-                >
+                <el-input v-model="juanbiao_form" :placeholder="$t('work.pleaseInput')"
+                  style="width: 200px; float: left">
                   <template slot="prepend">
                     {{ $t("work.sign") }}
                   </template>
                 </el-input>
               </el-col>
               <el-col :span="10">
-                <el-progress
-                  :text-inside="true"
-                  :percentage="file_percent"
-                  :format="format"
-                  style="line-height: 40px"
-                  :stroke-width="20"
-                  :color="customColors"
-                ></el-progress>
+                <el-progress :text-inside="true" :percentage="file_percent" :format="format" style="line-height: 40px"
+                  :stroke-width="20" :color="customColors"></el-progress>
               </el-col>
             </el-row>
             <div style="clear: both"></div>
-            <uploader
-              :options="options"
-              class="uploader-example"
-              ref="uploader"
-              @file-added="onFileAdded"
-              @file-removed="onFileRemoved"
-              :autoStart="false"
-              @complete="upload_over"
-              @drop.prevent="onDrag"
-            >
+            <uploader :options="options" class="uploader-example" ref="uploader" @file-added="onFileAdded"
+              @file-removed="onFileRemoved" :autoStart="false" @complete="upload_over" @drop.prevent="onDrag">
               <uploader-unsupport> </uploader-unsupport>
-              <uploader-drop
-                style="height: 405px"
-                class="drag-bg"
-                :style="'background-image:url(' + bgi + ');'"
-              >
+              <uploader-drop style="height: 405px" class="drag-bg" :style="'background-image:url(' + bgi + ');'">
                 <uploader-btn> {{ $t("work.selectFile") }}</uploader-btn>
                 <uploader-btn :directory="true">{{
                   $t("work.selectFloder")
@@ -321,131 +228,72 @@
           </div>
         </div>
       </el-col>
-      <el-col
-        :span="
-          switch_cont && switch_tag ? 12 : switch_cont && !switch_tag ? 0 : 24
-        "
-      >
+      <el-col :span="switch_cont && switch_tag ? 12 : switch_cont && !switch_tag ? 0 : 24
+        ">
         <div class="grid-content bg-purple">
           <div class="label">
             <div class="title" style="width: 100%">
-              <div style="display: inline-block; float: left">
+              <div style="float: left">
                 {{ $t("work.tag") }}
-                <el-button
-                  type="text"
-                  icon="el-icon-upload2"
-                  style="margin-left: 10px; font-size: 14px"
-                  @click="openFile"
-                >
+                <el-button type="text" icon="el-icon-upload2" style="margin-left: 10px; font-size: 14px"
+                  @click="openFile">
                   {{ $t("work.importTag") }}
                 </el-button>
               </div>
               <!--<el-checkbox v-model="flag">单面打印</el-checkbox>-->
-              <div style="display: inline-block; float: right; right: 0px">
-                <span
-                  style="font-size: 14px; color: #606266; font-weight: normal"
-                >
+              <div style="float: right; right: 0px">
+                <span style="font-size: 14px; color: #606266; font-weight: normal">
                   {{ $t("work.print") }}
                 </span>
-                <el-select
-                  v-model="print_flag"
-                  :placeholder="$t('work.pleaseSelect')"
-                  size="mini"
-                >
-                  <el-option
-                    v-for="item in print_op"
-                    v-if="!(flag && item.value == 1)"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value"
-                  >
+                <el-select v-model="print_flag" :placeholder="$t('work.pleaseSelect')" size="mini">
+                  <el-option v-for="item in print_op" v-if="!(flag && item.value == 1)" :key="item.value"
+                    :label="item.label" :value="item.value">
                   </el-option>
                 </el-select>
               </div>
             </div>
             <div style="float: right"></div>
-            <input
-              type="file"
-              accept=".soon,.cs"
-              @change="fileLoad"
-              ref="refFile"
-              style="display: none"
-            />
+            <input type="file" accept=".soon,.cs" @change="fileLoad" ref="refFile" style="display: none" />
             <div style="clear: both"></div>
             <div class="display">
-              <img
-                v-if="print_flag == 1 || print_flag == 2"
-                :src="fileData.frontDisplayPic"
-                style="
+              <img v-if="print_flag == 1 || print_flag == 2" :src="fileData.frontDisplayPic" style="
                   height: 120px;
                   position: relative;
                   top: 50%;
                   transform: translateY(-50%);
-                "
-              />
-              <img
-                v-if="print_flag == 1 || print_flag == 3"
-                :src="fileData.backDisplayPic"
-                style="
+                " />
+              <img v-if="print_flag == 1 || print_flag == 3" :src="fileData.backDisplayPic" style="
                   height: 120px;
                   position: relative;
                   top: 50%;
                   transform: translateY(-50%);
-                "
-              />
+                " />
             </div>
-            <el-table
-              :data="tableData"
-              height="185"
-              style="width: 100%"
-              :empty-text="$t('work.nodata')"
-            >
+            <el-table :data="tableData" height="185" style="width: 100%" :empty-text="$t('work.nodata')">
               <el-table-column prop="name" :label="$t('work.fieldName')">
               </el-table-column>
               <el-table-column prop="val" width="400">
                 <template slot="header" slot-scope="scope">
-                  <input
-                    type="file"
-                    accept=".csv"
-                    @change="fileLoad2"
-                    ref="refFile2"
-                    style="display: none"
-                  />
-                  <el-tooltip
-                    class="item"
-                    effect="dark"
-                    :content="
-                      file_name == null
-                        ? $t('work.binfile')
-                        : file_name.strLen() > 12
-                        ? file_name.subCHStr(0, 12) + '...'
-                        : file_name
-                    "
-                    placement="top-start"
-                  >
-                    <el-button
-                      type="text"
-                      icon="el-icon-upload2"
-                      style="margin-left: 10px; font-size: 14px"
-                      @click="openFile2"
-                    >
+                  <input type="file" accept=".csv" @change="fileLoad2" ref="refFile2" style="display: none" />
+                  <el-tooltip class="item" effect="dark" :content="file_name == null
+                    ? $t('work.binfile')
+                    : file_name.strLen() > 12
+                      ? file_name.subCHStr(0, 12) + '...'
+                      : file_name
+                    " placement="top-start">
+                    <el-button type="text" icon="el-icon-upload2" style="margin-left: 10px; font-size: 14px"
+                      @click="openFile2">
                       {{
                         file_name == null
                           ? $t("work.binfile")
                           : file_name.strLen() > 12
-                          ? file_name.subCHStr(0, 12) + "..."
-                          : file_name
+                            ? file_name.subCHStr(0, 12) + "..."
+                            : file_name
                       }}
                     </el-button>
                   </el-tooltip>
 
-                  <input
-                    type="file"
-                    accept="..zip,.rar"
-                    @change="fileLoad3"
-                    ref="refFile3"
-                    style="display: none"
-                  />
+                  <input type="file" accept="..zip,.rar" @change="fileLoad3" ref="refFile3" style="display: none" />
                   <!--<el-tooltip class="item" effect="dark" :content="file_name3" placement="top-start">
 									    <el-button type="text" icon="el-icon-upload2" style="margin-left: 10px;font-size: 14px"
 									    @click="openFile3">
@@ -455,28 +303,17 @@
                 </template>
                 <template slot-scope="scope">
                   <div v-if="scope.row.type == 1">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      :ref="scope.row.origin_name"
-                      :data-name="scope.row.origin_name"
-                    />
+                    <input type="file" accept="image/*" :ref="scope.row.origin_name"
+                      :data-name="scope.row.origin_name" />
                   </div>
-                  <div
-                    v-if="
-                      scope.row.type == 3 ||
-                      scope.row.type == 4 ||
-                      scope.row.type == 5
-                    "
-                  >
+                  <div v-if="
+                    scope.row.type == 3 ||
+                    scope.row.type == 4 ||
+                    scope.row.type == 5
+                  ">
                     <!--合成文本-->
-                    <el-input
-                      :placeholder="$t('work.pleaseInput')"
-                      v-model="form[scope.row.origin_name]"
-                      clearable
-                      style="width: calc(100% - 30px) !important"
-                      :disabled="csvIsExist"
-                    >
+                    <el-input :placeholder="$t('work.pleaseInput')" v-model="form[scope.row.origin_name]" clearable
+                      style="width: calc(100% - 30px) !important" :disabled="csvIsExist">
                     </el-input>
                   </div>
                 </template>
@@ -489,42 +326,26 @@
     <el-row :gutter="20" style="height: 30px; margin-top: 20px">
       <el-col :span="14">
         <div v-if="file_form == 3 && switch_cont">
-          <el-input
-            :placeholder="$t('work.pleasePassword')"
-            style="width: 25%; float: left"
-            show-password
-            v-model="p1"
-          >
+          <el-input :placeholder="$t('work.pleasePassword')" style="width: 25%; float: left" show-password v-model="p1">
             <template slot="prepend">
               {{ $t("work.password") }}
             </template>
           </el-input>
-          <el-input
-            :placeholder="$t('work.pleasePassword')"
-            style="width: 25%; float: left; margin-left: 10px"
-            show-password
-            v-model="p2"
-          >
+          <el-input :placeholder="$t('work.pleasePassword')" style="width: 25%; float: left; margin-left: 10px"
+            show-password v-model="p2">
             <template slot="prepend">
               {{ $t("work.comfirm") }}
             </template>
           </el-input>
-          <el-input
-            :placeholder="$t('work.addContent')"
-            style="width: 40%; float: left; margin-left: 10px"
-            v-model="zip_name"
-          >
+          <el-input :placeholder="$t('work.addContent')" style="width: 40%; float: left; margin-left: 10px"
+            v-model="zip_name">
             <template slot="prepend">
               {{ $t("work.name") }}
             </template>
           </el-input>
         </div>
         <div v-else-if="file_form == 2 && switch_cont">
-          <el-input
-            :placeholder="$t('work.addContent')"
-            style="width: 40%; float: left"
-            v-model="zip_name"
-          >
+          <el-input :placeholder="$t('work.addContent')" style="width: 40%; float: left" v-model="zip_name">
             <template slot="prepend">
               {{ $t("work.name") }}
             </template>
@@ -533,11 +354,7 @@
         <div style="width: 100%" v-else>&nbsp;</div>
       </el-col>
       <el-col :span="10">
-        <el-input
-          :placeholder="$t('work.addContent')"
-          v-model="number"
-          style="width: 200px; float: left"
-        >
+        <el-input :placeholder="$t('work.addContent')" v-model="number" style="width: 200px; float: left">
           <template slot="prepend">
             {{ $t("work.num") }}
           </template>
@@ -998,7 +815,8 @@ export default {
             data1.append(`file${files_n_incr}`, this.$refs.refFile.files[0]); //标签cs文件
             files_n_incr++;
           } else {
-            this.$message({offset:100,
+            this.$message({
+              offset: 100,
               message: this.$t("work.pleaseUploadTag"),
               type: "warning",
             });
@@ -1057,7 +875,8 @@ export default {
             }
           }
 
-          this.$message({offset:100,
+          this.$message({
+            offset: 100,
             message: this.$t("work.uploadingTag"),
           });
           let pathName;
@@ -1065,7 +884,8 @@ export default {
             //打开本地选项
             let rootFile = this.$refs.uploader.uploader.getRoot();
             if (rootFile.fileList.length != 1) {
-              this.$message({offset:100,
+              this.$message({
+                offset: 100,
                 message: this.$t("work.oneFolder"),
                 type: "warning",
               });
@@ -1073,7 +893,8 @@ export default {
             }
             let filePath = rootFile.fileList[0];
             if (!filePath.isFolder) {
-              this.$message({offset:100,
+              this.$message({
+                offset: 100,
                 message: this.$t("work.notFolder"),
                 type: "warning",
               });
@@ -1191,7 +1012,8 @@ export default {
       }
       if (!flag) {
         //报错内容
-        this.$message({offset:100,
+        this.$message({
+          offset: 100,
           message: this.$t("work.pleaseUploadingImgBin"),
           type: "warning",
         });
@@ -1211,7 +1033,8 @@ export default {
           }
           i++;
         }
-        this.$message({offset:100,
+        this.$message({
+          offset: 100,
           message: this.$t("work.UploadingImgBin"),
         });
         let re;
@@ -1228,7 +1051,8 @@ export default {
             re = true;
           })
           .catch(() => {
-            this.$message({offset:100,
+            this.$message({
+              offset: 100,
               message: this.$t("work.UploadingImgBinFail"),
               type: "warning",
             });
@@ -1242,7 +1066,8 @@ export default {
       if (this.switch_cont) {
         //开启了左边内容则先左边
         if (this.size == 0) {
-          this.$message({offset:100,
+          this.$message({
+            offset: 100,
             message: this.$t("work.pleaseUploadContent"),
             type: "warning",
           });
@@ -1261,7 +1086,8 @@ export default {
           return;
         } else {
           this.$refs.uploader.uploader.resume();
-          this.$message({offset:100,
+          this.$message({
+            offset: 100,
             message: this.$t("work.uploadingContent"),
           });
         }
@@ -1274,7 +1100,8 @@ export default {
           data1.append(`file${files_n_incr}`, this.$refs.refFile.files[0]); //标签cs文件
           files_n_incr++;
         } else {
-          this.$message({offset:100,
+          this.$message({
+            offset: 100,
             message: this.$t("work.pleaseUploadTag"),
             type: "warning",
           });
@@ -1330,7 +1157,8 @@ export default {
           }
         }
 
-        this.$message({offset:100,
+        this.$message({
+          offset: 100,
           message: this.$t("work.uploadingTag"),
         });
         this.$axios({
@@ -1476,7 +1304,8 @@ export default {
         let rootFile = this.$refs.uploader.uploader.getRoot();
         console.log(rootFile);
         if (rootFile.fileList.length != 1) {
-          this.$message({offset:100,
+          this.$message({
+            offset: 100,
             message: this.$t("work.oneFolder"),
             type: "warning",
           });
@@ -1484,7 +1313,8 @@ export default {
         }
         let filePath = rootFile.fileList[0];
         if (!filePath.isFolder) {
-          this.$message({offset:100,
+          this.$message({
+            offset: 100,
             message: this.$t("work.notFolder"),
             type: "warning",
           });
@@ -1509,7 +1339,8 @@ export default {
           !this.$refs.uploader.uploader.isComplete() &&
           !this.high_setting_form.localfiles
         ) {
-          this.$message({offset:100,
+          this.$message({
+            offset: 100,
             message: this.$t("work.uploadFail"),
             type: "warning",
           });
@@ -1532,7 +1363,8 @@ export default {
         //选择的是zip文档，则名称一定要填写
         if (this.file_form == 2) {
           if (this.zip_name == "") {
-            this.$message({offset:100,
+            this.$message({
+              offset: 100,
               message: this.$t("work.zipNameInput"),
               type: "warning",
             });
@@ -1543,7 +1375,8 @@ export default {
         //选择的是zip加密，名称和密码需要校验
         if (this.file_form == 3) {
           if (this.zip_name == "") {
-            this.$message({offset:100,
+            this.$message({
+              offset: 100,
               message: this.$t("work.zipNameInput"),
               type: "warning",
             });
@@ -1551,7 +1384,8 @@ export default {
           }
           data += "&zip_name=" + this.zip_name;
           if (this.p1 == "" || this.p1 != this.p2) {
-            this.$message({offset:100,
+            this.$message({
+              offset: 100,
               message: this.$t("work.zipPassWrong"),
               type: "warning",
             });
@@ -1564,7 +1398,8 @@ export default {
       if (this.switch_tag) {
         //标签开启，则标签文件一定要上传
         if (this.$refs.refFile.files.length == 0) {
-          this.$message({offset:100,
+          this.$message({
+            offset: 100,
             message: this.$t("work.pleaseUploadTag"),
             type: "warning",
           });
@@ -1584,7 +1419,8 @@ export default {
           //打印面数print_flag为1 - 双面的时候，模板flag必须为1 - 双面
           //打印面数print_flag为2 - 正 的时候 模板正面必须有内容 (flag != 3)
           //打印面数print_flag为3 - 反 的时候 模板背面必须有内容 (flag != 2)
-          this.$message({offset:100,
+          this.$message({
+            offset: 100,
             message: this.$t("work.print_flagError"),
             type: "warning",
           });
@@ -1593,7 +1429,8 @@ export default {
         data += "&print_flag=" + this.print_flag; //打印面数需要在开启了标签时，1双 2正3背
       }
       if (this.juanbiao_form == "") {
-        this.$message({offset:100,
+        this.$message({
+          offset: 100,
           message: this.$t("work.juanbiaoInput"),
           type: "warning",
         });
@@ -1620,7 +1457,8 @@ export default {
       //}
       //console.log(data);
       //console.log(data_param)
-      this.$message({offset:100,
+      this.$message({
+        offset: 100,
         message: this.$t("work.submiting"),
       });
       this.$emit("jobPost");
@@ -1628,16 +1466,19 @@ export default {
         method: "post",
         url: "/rest/job/?" + data_param + data,
         //data: post_data
-      }).then((res) => {});
+      }).then((res) => { });
     },
   },
   computed: {
     file_percent() {
+      const sizeFormNum = parseFloat(this.size_form);
+      if (isNaN(sizeFormNum) || sizeFormNum <= 0) return 0;
       let t =
         (this.size /
-          (((this.size_form * 1000) / 1.024 / 1.024 / 1.024) * 1024 * 1024)) *
+          (((sizeFormNum * 1000) / 1.024 / 1.024 / 1.024) * 1024 * 1024)) *
         100;
-      return t ? t > 100 ? 100.1 : t : 0
+      if (isNaN(t) || !isFinite(t)) return 0;
+      return t > 100 ? 100.1 : t;
     },
     print_op() {
       return [
@@ -1812,7 +1653,8 @@ export default {
     },
     file_percent(val) {
       if (val == 100.1) {
-        this.$message({offset:100,
+        this.$message({
+          offset: 100,
           message: this.$t("work.sizeExtra"),
           type: "warning",
         });
@@ -1861,6 +1703,7 @@ export default {
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   padding: 10px;
+
   .title {
     float: left;
     font-size: 18px;
@@ -1869,6 +1712,7 @@ export default {
     line-height: 40px;
   }
 }
+
 .label {
   height: 500px;
   width: 100%;
@@ -1895,8 +1739,7 @@ export default {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
 }
 
-.uploader-example .uploader-btn {
-}
+
 
 .uploader-example .uploader-list {
   max-height: 405px;
@@ -1904,23 +1747,28 @@ export default {
   overflow-x: hidden;
   overflow-y: auto;
 }
+
 .uploader-list::-webkit-scrollbar {
   /*滚动条整体样式*/
-  width: 10px; /*高宽分别对应横竖滚动条的尺寸*/
+  width: 10px;
+  /*高宽分别对应横竖滚动条的尺寸*/
   height: 1px;
 }
+
 .uploader-list::-webkit-scrollbar-thumb {
   /*滚动条里面小方块*/
   border-radius: 10px;
   box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
   background: #c7c7cb;
 }
+
 .uploader-list::-webkit-scrollbar-track {
   /*滚动条里面轨道*/
   box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
   border-radius: 10px;
   background: #ededed;
 }
+
 .display {
   margin-top: 10px;
   background-color: #212830;
@@ -1939,6 +1787,7 @@ export default {
 /deep/ .uploader-file-name {
   text-align: left;
 }
+
 /deep/ .el-progress-bar__outer {
   background-color: #bac2d7;
 }

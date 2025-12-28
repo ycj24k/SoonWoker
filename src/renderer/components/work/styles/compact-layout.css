@@ -1,0 +1,172 @@
+/* Compact Dialog Styles for Advanced Settings */
+/* 注意：此文件为纯 CSS，不应包含 /deep/。穿透逻辑应在引用它的 Vue 组件中通过 ::v-deep 实现 */
+
+.grand-dialog {
+  border-radius: 12px !important;
+  overflow: hidden; /* Ensure header/footer respect radius */
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12) !important;
+}
+.grand-dialog .el-dialog__header {
+  padding: 20px 24px !important;
+  border-bottom: 1px solid #f0f0f0;
+  background: #fff;
+}
+.grand-dialog .el-dialog__title {
+  font-size: 18px !important;
+  font-weight: 600;
+  color: #303133;
+}
+.grand-dialog .el-dialog__body {
+  padding: 24px !important;
+  background-color: #f6f8fa; /* Global gray background for contrast */
+}
+
+.grand-section {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  padding: 16px 20px !important;
+  margin-bottom: 16px !important;
+  border: 1px solid #eef0f2;
+}
+
+.grand-title {
+  font-size: 13px !important;
+  font-weight: 700;
+  margin-bottom: 10px !important;
+  color: #1f2937;
+  display: flex;
+  align-items: center;
+}
+
+.grand-title .title-line {
+  flex: 1;
+  height: 1px;
+  background: #f3f4f6;
+  margin-left: 10px;
+}
+
+.divider-h {
+  height: 1px;
+  background: #f3f4f6;
+  margin: 8px 0 !important;
+}
+
+.feature-group {
+  background: #fafafa;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  border: 1px solid #f0f0f0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.feature-group.active {
+  background: #ffffff;
+  border-color: #67c23a;
+  box-shadow: 0 4px 12px rgba(103, 194, 58, 0.08);
+}
+
+.feature-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* 覆盖 checkbox 文字颜色 */
+.feature-header ::v-deep .el-checkbox__label {
+  font-weight: 600 !important;
+  color: #374151 !important;
+}
+
+.feature-content {
+  margin-top: 10px;
+  padding: 12px;
+  background: #f8fafc;
+  border-radius: 6px;
+  border: 1px solid #edf2f7;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.sub-feature {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed #e2e8f0;
+}
+
+.grand-section .el-form-item {
+  margin-bottom: 14px !important;
+}
+
+/* 最后一个元素不需要下边距 */
+.grand-section .el-col:nth-last-child(-n + 2) .el-form-item {
+  margin-bottom: 0 !important;
+}
+
+.grand-section ::v-deep .el-form-item__label {
+  white-space: nowrap !important;
+  font-size: 13px !important;
+  color: #64748b;
+}
+
+.grand-switch-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.g-switch-item {
+  padding: 8px 12px !important;
+  background: #fafafa;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #f0f0f0;
+  transition: all 0.2s;
+}
+
+.g-switch-item:hover {
+  background: #fff;
+  border-color: #67c23a;
+  box-shadow: 0 3px 8px rgba(103, 194, 58, 0.12);
+}
+
+.g-label {
+  font-size: 13px !important;
+  white-space: nowrap;
+  color: #374151;
+  font-weight: 500;
+}
+
+.path-box-container {
+  margin-top: 16px !important;
+  padding-top: 16px !important;
+  border-top: 1px dashed #e5e7eb;
+}
+
+.path-box {
+  background: #f8fafc;
+  padding: 12px !important;
+  border-radius: 8px;
+  border: 1px solid #f1f5f9;
+}
+
+.grand-setting-content::-webkit-scrollbar {
+  width: 6px;
+}
+.grand-setting-content::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 3px;
+}

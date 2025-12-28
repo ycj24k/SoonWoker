@@ -1,26 +1,32 @@
 export default {
-          recorder: {
-          startRecording: "Start Recording",
-          stopRecording: "Stop Recording",
-          recordingStarted: "Screen recording started",
-          recordingStopped: "Recording stopped",
-          savedSuccess: "Recording saved",
-          startFailed: "Failed to start recording",
-          stopFailed: "Failed to stop recording",
-          saveFailed: "Failed to save recording"
-        },
-        networkAuth: {
-          title: "Network Path Authentication",
-          description: "The following network paths were detected. Please enter the corresponding username and password:",
-          pathLabel: "Network Path:",
-          userName: "Username",
-          password: "Password",
-          confirm: "Confirm",
-          cancel: "Cancel",
-          authRequired: "Please fill in username and password for all network paths",
-          authSuccess: "Network authentication information saved",
-          authCanceled: "Network path authentication canceled"
-        },
+  common: {
+    confirm: "Confirm",
+    cancel: "Cancel",
+    save: "Save",
+    ok: "OK"
+  },
+  recorder: {
+    startRecording: "Start Recording",
+    stopRecording: "Stop Recording",
+    recordingStarted: "Screen recording started",
+    recordingStopped: "Recording stopped",
+    savedSuccess: "Recording saved",
+    startFailed: "Failed to start recording",
+    stopFailed: "Failed to stop recording",
+    saveFailed: "Failed to save recording"
+  },
+  networkAuth: {
+    title: "Network Path Authentication",
+    description: "The following network paths were detected. Please enter the corresponding username and password:",
+    pathLabel: "Network Path:",
+    userName: "Username",
+    password: "Password",
+    confirm: "Confirm",
+    cancel: "Cancel",
+    authRequired: "Please fill in username and password for all network paths",
+    authSuccess: "Network authentication information saved",
+    authCanceled: "Network path authentication canceled"
+  },
   finger: {
     intTips: "The fingerprint module is initializing",
     errorInttips: "Fingerprint module initialization fail",
@@ -409,12 +415,45 @@ export default {
     cdPart: "Virtual Disc",
     forbidCopyPart: "Anti-copy Format",
     cdWithDisk: "Removable Disk+Virtual Disc",
-    senior: "Advanced job Settings",
+    senior: "Advanced Settings",
+    // Basic Config
+    basicConfig: "Basic Config",
     better: "Priority",
-    low: "Low",
-    normal: "Normal",
-    high: "Hign",
     startWorkSpace: "Target Station",
+    ribbonType: "Ribbon Type",
+    formatFile: "Format Type",
+    // Advanced Features
+    advancedFeatures: "Advanced Features",
+    generateISO: "Generate ISO",
+    isoFileName: "ISO Name",
+    inputIsoName: "Enter ISO Name",
+    generateZIP: "Generate ZIP",
+    zipFileName: "ZIP Name",
+    inputZipName: "Enter ZIP Name",
+    isEncrypt: "Encrypt",
+    inputPassword: "Password",
+    confirmPassword: "Confirm Password",
+    // Hash
+    genMD5: "Gen MD5",
+    copyHash: "Copy HASH",
+    printMD5: "Print MD5",
+    // Switches
+    failLabel: "Print Fail Label",
+    allowSpanCard: "Span USB Card",
+    presetContent: "Preset Content",
+    // Recording
+    screenRecordReview: "Screen Record Review",
+    enableScreenRecord: "Enable Recording",
+    printRecordLogo: "Print Logo",
+    recordPath: "Record Path",
+    // Hardware
+    hardwareControl: "Hardware Control",
+    installDongle: "Dongle Count",
+    installCount: "Install Count",
+    setAuthCode: "Auth Code",
+    inputAuthCode: "Enter Auth Code",
+    // Metadata
+    metadataEdit: "Metadata Edit",
     any: "Any",
     ribbonType: "RibbonType",
     sigleColor: "Mono",
@@ -434,6 +473,8 @@ export default {
     selectFloder: "Add Floders",
     tag: "Lable",
     importTag: "Add Lables",
+    design: "Design",
+    import: "Import",
     print: "Print:",
     front: "Print front only",
     back: "Print back only",
