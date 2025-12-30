@@ -151,6 +151,8 @@ export default {
     successReserve: "Save success",
     errorRead: "Reading configuration file fail",
     configTitle: "CardSoon Production Service Configuration File",
+    authCodePlaceholder: "Enter authorization code",
+    authCodeTips: "System authorization code for activating advanced features and license validation"
   },
   dialog: {
     closeTips: "The window will close in 0.5 seconds...",

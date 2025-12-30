@@ -6,13 +6,8 @@
           <div class="title">
             {{ $t("index.wordSpace") }}
           </div>
-          <div
-            class="card"
-            v-for="(item, index) of infoData"
-            :key="item.PrinterID"
-            @click="() => (printData = index)"
-            style="text-align: left"
-          >
+          <div class="card" v-for="(item, index) of infoData" :key="item.PrinterID" @click="() => (printData = index)"
+            style="text-align: left">
             <span style="font-size: 18px; margin-left: 40px">{{
               getPrintName(item.PrinterID, true)
             }}</span>
@@ -30,9 +25,7 @@
       <div :span="21" style="height: 100%; width: calc(100% - 164px)">
         <div class="grid-content bg-purple-light mid">
           <div class="toMain">
-            <span style="margin-right: 20px"
-              >{{ $t("admin.hello") }} {{ user }}</span
-            >
+            <span style="margin-right: 20px">{{ $t("admin.hello") }} {{ user }}</span>
             <router-link to="/main"> {{ $t("admin.home") }}</router-link>
           </div>
 
@@ -46,27 +39,11 @@
             <el-tab-pane :label="$t('admin.userManage')" name="second">
               <div class="brief">
                 <el-row :gutter="20" style="height: 100%">
-                  <el-table
-                    :data="userData"
-                    style="width: 100%"
-                    :empty-text="$t('admin.nodata')"
-                  >
-                    <el-table-column
-                      prop="userUuid"
-                      label="ID"
-                    ></el-table-column>
-                    <el-table-column
-                      prop="userName"
-                      :label="$t('admin.userName')"
-                    ></el-table-column>
-                    <el-table-column
-                      prop="userRole"
-                      :label="$t('admin.role')"
-                    ></el-table-column>
-                    <el-table-column
-                      prop="time"
-                      :label="$t('admin.lastTime')"
-                    ></el-table-column>
+                  <el-table :data="userData" style="width: 100%" :empty-text="$t('admin.nodata')">
+                    <el-table-column prop="userUuid" label="ID"></el-table-column>
+                    <el-table-column prop="userName" :label="$t('admin.userName')"></el-table-column>
+                    <el-table-column prop="userRole" :label="$t('admin.role')"></el-table-column>
+                    <el-table-column prop="time" :label="$t('admin.lastTime')"></el-table-column>
                     <el-table-column prop="time" :label="$t('admin.online')">
                       <template slot-scope="scope">
                         {{
@@ -79,26 +56,12 @@
                     <!--<el-table-column prop="describe" label="描述"></el-table-column>-->
                     <el-table-column width="120">
                       <template slot-scope="scope">
-                        <el-button
-                          type="text"
-                          size="medium"
-                          @click="() => edit(scope.row)"
-                          >{{ $t("admin.edit") }}</el-button
-                        >
-                        <el-button
-                          type="text"
-                          size="medium"
-                          @click="adduserVisible = true"
-                          v-if="scope.row.userName == 'admin'"
-                          >{{ $t("admin.add") }}</el-button
-                        >
-                        <el-button
-                          type="text"
-                          size="medium"
-                          @click="() => deleted(scope.row)"
-                          v-if="scope.row.userName != 'admin'"
-                          >{{ $t("admin.delete") }}</el-button
-                        >
+                        <el-button type="text" size="medium" @click="() => edit(scope.row)">{{ $t("admin.edit")
+                        }}</el-button>
+                        <el-button type="text" size="medium" @click="adduserVisible = true"
+                          v-if="scope.row.userName == 'admin'">{{ $t("admin.add") }}</el-button>
+                        <el-button type="text" size="medium" @click="() => deleted(scope.row)"
+                          v-if="scope.row.userName != 'admin'">{{ $t("admin.delete") }}</el-button>
                       </template>
                     </el-table-column>
                   </el-table>
@@ -116,47 +79,30 @@
                   <div class="service">
                     <div class="lable">{{ $t("admin.selectWorkstation") }}</div>
                     <el-select v-model="workValue">
-                      <el-option
-                        v-for="(item, index) in infoData"
-                        :key="item.PrinterID"
-                        :label="getPrintName(item.PrinterID)"
-                        :value="item.PrinterID"
-                        :disabled="runningState"
-                      >
+                      <el-option v-for="(item, index) in infoData" :key="item.PrinterID"
+                        :label="getPrintName(item.PrinterID)" :value="item.PrinterID" :disabled="runningState">
                       </el-option>
                     </el-select>
 
                     <div class="lable">{{ $t("admin.formatType") }}</div>
                     <el-select v-model="formatValue">
-                      <el-option
-                        v-for="item in formatOptions"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value"
-                        :disabled="runningState"
-                      >
+                      <el-option v-for="item in formatOptions" :key="item.value" :label="item.label" :value="item.value"
+                        :disabled="runningState">
                       </el-option>
                     </el-select>
 
                     <div class="lable">{{ $t("admin.number") }}</div>
-                    <el-input
-                      v-model="number"
-                      :disabled="runningState"
-                    ></el-input>
+                    <el-input v-model="number" :disabled="runningState"></el-input>
                   </div>
-                  <el-button
-                    @click="
-                      () => {
-                        running = 0;
-                        runningEmergy = false;
-                        isFormat = true;
-                        handleFormat();
-                      }
-                    "
-                    :loading="runningState && isFormat"
-                    :disabled="runningState && !isFormat"
-                    >{{ $t("work.submit") }}</el-button
-                  >
+                  <el-button @click="
+                    () => {
+                      running = 0;
+                      runningEmergy = false;
+                      isFormat = true;
+                      handleFormat();
+                    }
+                  " :loading="runningState && isFormat" :disabled="runningState && !isFormat">{{ $t("work.submit")
+                  }}</el-button>
                 </div>
 
                 <div class="copy">
@@ -167,41 +113,25 @@
                   <div class="service">
                     <div class="lable">{{ $t("admin.selectWorkstation") }}</div>
                     <el-select v-model="workValue2">
-                      <el-option
-                        v-for="(item, index) in infoData"
-                        :key="index"
-                        :label="getPrintName(item.PrinterID)"
-                        :value="item.PrinterID"
-                        :disabled="runningState"
-                      >
+                      <el-option v-for="(item, index) in infoData" :key="index" :label="getPrintName(item.PrinterID)"
+                        :value="item.PrinterID" :disabled="runningState">
                       </el-option>
                     </el-select>
 
                     <div class="lable">{{ $t("admin.copyPath") }}</div>
-                    <el-input
-                      v-model="path"
-                      :disabled="runningState"
-                    ></el-input>
+                    <el-input v-model="path" :disabled="runningState"></el-input>
 
                     <div class="lable">{{ $t("admin.number") }}</div>
-                    <el-input
-                      v-model="number2"
-                      :disabled="runningState"
-                    ></el-input>
+                    <el-input v-model="number2" :disabled="runningState"></el-input>
                   </div>
-                  <el-button
-                    :loading="runningState && !isFormat"
-                    :disabled="runningState && isFormat"
-                    @click="
-                      () => {
-                        running = 0;
-                        runningEmergy = false;
-                        isFormat = false;
-                        handleCopy();
-                      }
-                    "
-                    >{{ $t("work.submit") }}</el-button
-                  >
+                  <el-button :loading="runningState && !isFormat" :disabled="runningState && isFormat" @click="
+                    () => {
+                      running = 0;
+                      runningEmergy = false;
+                      isFormat = false;
+                      handleCopy();
+                    }
+                  ">{{ $t("work.submit") }}</el-button>
                 </div>
               </div>
             </el-tab-pane>
@@ -235,49 +165,22 @@
       <div class="wLog" v-html="wlog" style="text-align: left"></div>
     </el-dialog>
 
-    <el-dialog
-      :title="$t('admin.addUser')"
-      :visible.sync="adduserVisible"
-      width="450px"
-      class="infdialog"
-      destroy-on-close
-      :close-on-click-modal="false"
-    >
-      <adduser
-        :changevisiable="this.chageAdduservisible"
-        v-if="adduserVisible"
-      ></adduser>
+    <el-dialog :title="$t('admin.addUser')" :visible.sync="adduserVisible" width="450px" class="infdialog"
+      destroy-on-close :close-on-click-modal="false">
+      <adduser :changevisiable="this.chageAdduservisible" v-if="adduserVisible"></adduser>
     </el-dialog>
 
-    <el-dialog
-      :title="$t('admin.editUser')"
-      :visible.sync="edituserVisible"
-      width="450px"
-      class="infdialog"
-      destroy-on-close
-      :close-on-click-modal="false"
-    >
-      <edituser
-        :changevisiable="this.chageEdituservisible"
-        v-if="edituserVisible"
-        :data="editData"
-        @editover="
-          () => {
-            chageEdituservisible(false);
-            getUserData();
-          }
-        "
-      ></edituser>
+    <el-dialog :title="$t('admin.editUser')" :visible.sync="edituserVisible" width="450px" class="infdialog"
+      destroy-on-close :close-on-click-modal="false">
+      <edituser :changevisiable="this.chageEdituservisible" v-if="edituserVisible" :data="editData" @editover="
+        () => {
+          chageEdituservisible(false);
+          getUserData();
+        }
+      "></edituser>
     </el-dialog>
-    <el-dialog
-      :title="$t('admin.copying')"
-      :visible.sync="copyVisible"
-      width="450px"
-    >
-      <el-progress
-        :percentage="parseInt(copyState.progress * 100)"
-        v-if="copyVisible"
-      ></el-progress>
+    <el-dialog :title="$t('admin.copying')" :visible.sync="copyVisible" width="450px">
+      <el-progress :percentage="parseInt(copyState.progress * 100)" v-if="copyVisible"></el-progress>
     </el-dialog>
   </div>
 </template>
@@ -464,7 +367,7 @@ export default {
         131078: { tag: "Card_Low", err: 0 },
         131081: { tag: "Need_Cleaning", err: 0 },
         1167: { tag: "PAVO_DS_OFFLINE", err: 0 },
-        196609:{ tag: "FIND_CARD", err: 0 },
+        196609: { tag: "FIND_CARD", err: 0 },
       },
       errList: [],
       checkStates: {},
@@ -513,6 +416,11 @@ export default {
         method: "get",
         url: "/web/get_printer_info",
       }).then((res) => {
+        if (!res.data || !res.data.printerList) {
+          console.warn('获取工作站列表返回的数据格式不正确:', res)
+          this.infoData = []
+          return
+        }
         this.infoData = res.data.printerList;
         this.workValue2 = this.workValue =
           res.data.printerList.length > 0
@@ -527,6 +435,10 @@ export default {
             this.DualSide = 1; //只要有一个是双面就是1
           }
         }
+      }).catch((e) => {
+        console.error('获取工作站列表失败:', e)
+        this.infoData = []
+        this.$message.error('获取工作站列表失败，请检查网络连接')
       });
     },
     runCheckState() {
@@ -561,8 +473,7 @@ export default {
               //阻止即将发生的事件
               this.runningEmergy = true;
               appendLog(
-                `Task ${this.running + 1}/${
-                  this.isFormat ? this.number : this.number2
+                `Task ${this.running + 1}/${this.isFormat ? this.number : this.number2
                 } failed, Error = ${data.printer_status}`,
                 this.root
               );
@@ -778,10 +689,10 @@ export default {
             );
             this.$message(
               this.$t("admin.comingSoon") +
-                `${time[0]}` +
-                this.$t("admin.readLetter") +
-                `${disk[0]}` +
-                this.$t("admin.makeCpoy")
+              `${time[0]}` +
+              this.$t("admin.readLetter") +
+              `${disk[0]}` +
+              this.$t("admin.makeCpoy")
             );
             this.handleCopyFile(`${disk[0]}:\\`);
           }
@@ -877,10 +788,10 @@ export default {
           ) {
             this.$message(
               this.$t("admin.comingSoon") +
-                `${time[0]}` +
-                this.$t("admin.readLetter") +
-                `${disk[0]}` +
-                this.$t("admin.format")
+              `${time[0]}` +
+              this.$t("admin.readLetter") +
+              `${disk[0]}` +
+              this.$t("admin.format")
             );
             await this.$axios({
               method: "post",
@@ -1032,42 +943,50 @@ export default {
 /deep/ .el-tabs__content {
   overflow-y: auto;
 }
+
 .infdialog {
   /deep/.el-dialog {
     padding: 20px 0px;
   }
+
   /deep/.el-dialog__header {
     padding: 0px;
     font-size: 15px;
     font-weight: bold;
   }
+
   /deep/.el-dialog__body {
     margin-top: 30px;
     padding: 0px;
   }
-  /deep/.el-dialog__title {
-  }
+
+  /deep/.el-dialog__title {}
 }
 
 .wLog {
   max-height: 600px;
   overflow: auto;
 }
+
 h1,
 h2 {
   font-weight: normal;
 }
+
 ul {
   list-style-type: none;
   padding: 0;
 }
+
 li {
   display: inline-block;
   margin: 0 10px;
 }
+
 a {
   color: #42b983;
 }
+
 .left {
   background-color: #e8e7ee;
   height: 100%;
@@ -1076,10 +995,12 @@ a {
   box-sizing: border-box;
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
+
   .title {
     color: #999999;
     font-size: 28px;
   }
+
   .card {
     background-color: #f5f5f5;
     height: 50px;
@@ -1100,36 +1021,45 @@ a {
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   overflow-y: auto;
+
   .tabs {
     height: 100%;
+
     /deep/.el-tabs__header {
       margin: 0px;
     }
+
     /deep/ .el-tabs__content {
       height: 100%;
     }
   }
+
   &::-webkit-scrollbar {
     /*滚动条整体样式*/
-    width: 10px; /*高宽分别对应横竖滚动条的尺寸*/
+    width: 10px;
+    /*高宽分别对应横竖滚动条的尺寸*/
     height: 1px;
   }
+
   &::-webkit-scrollbar-thumb {
     /*滚动条里面小方块*/
     border-radius: 10px;
     box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
     background: #c7c7cb;
   }
+
   &::-webkit-scrollbar-track {
     /*滚动条里面轨道*/
     box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
     border-radius: 10px;
     background: #ededed;
   }
+
   .system {
     height: 100%;
     width: 100%;
   }
+
   .App {
     height: 100%;
     width: 100%;
@@ -1139,10 +1069,12 @@ a {
     box-sizing: border-box;
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
+
     .format {
       width: 100%;
       height: 300px;
       border-bottom: 1px rgb(224, 224, 224) solid;
+
       .title {
         font-size: 14px;
         width: 150px;
@@ -1155,6 +1087,7 @@ a {
         background-color: rgb(240, 240, 240);
         font-weight: bold;
       }
+
       .tips {
         font-size: 14px;
         padding: 10px;
@@ -1163,22 +1096,27 @@ a {
         align-items: center;
         text-align: left;
       }
+
       .service {
         height: 150px;
         display: flex;
         align-items: center;
         justify-content: flex-start;
+
         .lable {
           margin: 20px;
           font-size: 14px;
         }
+
         .el-select {
           width: 150px;
         }
+
         .el-input {
           width: 180px;
         }
       }
+
       .el-button {
         color: rgb(154, 202, 128);
         width: 120px;
@@ -1189,12 +1127,15 @@ a {
         float: right;
         margin-right: 25px;
       }
+
       .el-button:hover {
         background-color: white;
       }
+
       .el-button:active {
         background-color: white;
       }
+
       .el-button:focus {
         background-color: white;
       }
@@ -1204,6 +1145,7 @@ a {
       width: 100%;
       height: 300px;
       border-bottom: 1px rgb(224, 224, 224) solid;
+
       .title {
         margin-top: 10px;
         font-size: 14px;
@@ -1217,6 +1159,7 @@ a {
         background-color: rgb(240, 240, 240);
         font-weight: bold;
       }
+
       .tips {
         font-size: 14px;
         padding: 10px;
@@ -1224,22 +1167,27 @@ a {
         justify-content: flex-start;
         align-items: center;
       }
+
       .service {
         height: 150px;
         display: flex;
         align-items: center;
         justify-content: flex-start;
+
         .lable {
           margin: 20px;
           font-size: 14px;
         }
+
         .el-select {
           width: 150px;
         }
+
         .el-input {
           width: 180px;
         }
       }
+
       .el-button {
         color: rgb(154, 202, 128);
         width: 120px;
@@ -1250,21 +1198,26 @@ a {
         float: right;
         margin-right: 25px;
       }
+
       .el-button:hover {
         background-color: white;
       }
+
       .el-button:active {
         background-color: white;
       }
+
       .el-button:focus {
         background-color: white;
       }
     }
   }
+
   .dispose {
     height: 100%;
     width: 100%;
   }
+
   .brief {
     height: 90%;
     width: 100%;
@@ -1274,10 +1227,12 @@ a {
     box-sizing: border-box;
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
+
     .el-table {
       position: absolute;
       z-index: 0;
     }
+
     .add-button {
       position: absolute;
       top: 6px;
@@ -1286,6 +1241,7 @@ a {
     }
   }
 }
+
 .right {
   background-color: #c8cfd7;
   height: 100%;
@@ -1295,10 +1251,12 @@ a {
   box-sizing: border-box;
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
+
   .title {
     color: #999999;
     font-size: 28px;
   }
+
   .log {
     padding: 20px;
     font-size: 18px;
@@ -1311,11 +1269,13 @@ a {
     -moz-box-sizing: border-box;
   }
 }
+
 .toMain {
   position: absolute;
   right: 200px;
   font-size: 16px;
   z-index: 1;
+
   .link {
     color: blue;
     cursor: pointer;

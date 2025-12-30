@@ -1025,6 +1025,13 @@ export default {
         url: '/web/get_printer_info'
       })
         .then((res) => {
+          if (!res.data || !res.data.printerList) {
+            console.warn('获取工作站列表返回的数据格式不正确:', res)
+            this.infoData = []
+            this.$message.error(this.$t('main.notConnected') || '获取工作站列表失败')
+            return
+          }
+
           let infoData = [...this.infoData]
           this.infoData = res.data.printerList.map((item, index) => {
             let child = { ...item }
@@ -1038,7 +1045,7 @@ export default {
             }
           })
           // console.log('infoData', this.infoData)
-          if (!res.data.printerList || res.data.printerList.length == 0) {
+          if (res.data.printerList.length == 0) {
             this.$message.error(this.$t('main.notConnected'))
           }
           let DualSide = 0 //默认是单面
@@ -1077,7 +1084,9 @@ export default {
           this.DualSide = DualSide
         })
         .catch((e) => {
-
+          console.error('获取工作站列表失败:', e)
+          this.infoData = []
+          this.$message.error(this.$t('main.notConnected') || '获取工作站列表失败，请检查网络连接')
         })
     },
     // 清除报错通知

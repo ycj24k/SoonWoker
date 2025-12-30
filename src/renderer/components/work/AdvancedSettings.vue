@@ -17,11 +17,6 @@
             </el-form>
         </div>
         <span slot="footer" class="dialog-footer grand-footer">
-            <div class="footer-left">
-                <el-button type="warning" size="medium" plain icon="el-icon-key" @click="setAuthCode">
-                    设置授权码
-                </el-button>
-            </div>
             <div class="footer-buttons">
                 <el-button @click="handleClose" size="medium" icon="el-icon-close">{{ $t('common.cancel') }}</el-button>
                 <el-button type="primary" @click="handleSave" size="medium" icon="el-icon-check">{{ $t('common.confirm')
@@ -76,22 +71,41 @@ export default {
             this.visibleSync = false
         },
         handleSave() {
+            // 验证加密狗计数
+            if (this.form.is_dongle_count) {
+                if (!this.form.dongle_count || this.form.dongle_count <= 0 || !Number.isInteger(this.form.dongle_count)) {
+                    this.$message.warning(this.$t('work.dongleCountRequired') || '请输入有效的加密狗安装次数（必须是正整数）')
+                    return
+                }
+            }
+
+            // 验证 ISO 文件名
+            if (this.form.is_generate_iso && !this.form.iso_file_name) {
+                this.$message.warning(this.$t('work.isoNameInput') || '请输入 ISO 文件名')
+                return
+            }
+
+            // 验证 ZIP 文件名
+            if (this.form.is_generate_zip) {
+                if (!this.form.zip_file_name) {
+                    this.$message.warning(this.$t('work.zipNameInput') || '请输入 ZIP 文件名')
+                    return
+                }
+
+                // 验证 ZIP 加密密码
+                if (this.form.is_zip_encrypt) {
+                    if (!this.form.zip_password) {
+                        this.$message.warning(this.$t('work.pleasePassword') || '请输入 ZIP 压缩密码')
+                        return
+                    }
+                    if (this.form.zip_password !== this.form.zip_repassword) {
+                        this.$message.warning(this.$t('work.zipPassWrong') || 'ZIP 压缩密码不一致')
+                        return
+                    }
+                }
+            }
+
             this.$emit('save')
-        },
-        setAuthCode() {
-            this.$prompt(this.$t('work.inputAuthCode') || '请输入作业授权码', this.$t('work.setAuthCode') || '授权码设置', {
-                confirmButtonText: this.$t('common.ok') || '确定',
-                cancelButtonText: this.$t('common.cancel') || '取消',
-                inputValue: this.form.auth_code || '',
-                inputPattern: /^[a-zA-Z0-9]*$/,
-                inputErrorMessage: '授权码格式不正确'
-            }).then(({ value }) => {
-                this.$set(this.form, 'auth_code', value);
-                this.$message({
-                    type: 'success',
-                    message: '授权码已设置'
-                });
-            }).catch(() => { });
         }
     }
 }
@@ -101,7 +115,7 @@ export default {
 /* 样式将包含在主组件中或按需引入 */
 .grand-footer {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     align-items: center;
     width: 100%;
 }

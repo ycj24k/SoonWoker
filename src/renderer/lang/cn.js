@@ -117,6 +117,8 @@ export default {
     successReserve: "保存成功!",
     errorRead: "读取配置文件失败!",
     configTitle: "系统配置",
+    authCodePlaceholder: "请输入授权码",
+    authCodeTips: "系统授权码，用于激活高级功能和许可验证"
   },
   dialog: {
     closeTips: "0.5秒后将自动关闭......",

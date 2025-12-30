@@ -4,12 +4,7 @@
     <div class="row">
       <div class="lable">LogLevel</div>
       <el-select v-model="iniData.LogLevel">
-        <el-option
-          v-for="item in LogLevelOptions"
-          :key="item.value"
-          :label="item.label"
-          :value="item.value"
-        >
+        <el-option v-for="item in LogLevelOptions" :key="item.value" :label="item.label" :value="item.value">
         </el-option>
       </el-select>
       <div class="tips">{{ $t("dispose.infoTips") }}</div>
@@ -17,12 +12,7 @@
     <div class="row">
       <div class="lable">AutoRetryTimes</div>
       <el-select v-model="iniData.AutoRetryTimes">
-        <el-option
-          v-for="item in autoRetryOptions"
-          :key="item.value"
-          :label="item.label"
-          :value="item.value"
-        >
+        <el-option v-for="item in autoRetryOptions" :key="item.value" :label="item.label" :value="item.value">
         </el-option>
       </el-select>
       <div class="tips">{{ $t("dispose.errorTips1") }}</div>
@@ -68,14 +58,11 @@
       </div>
       <div class="tips">{{ $t("dispose.isReservetask") }}</div>
     </div>
-    <div
-      class="row"
-      style="
+    <div class="row" style="
         align-items: start;
         height: 50px;
         border-bottom: 1px rgb(224, 224, 224) solid;
-      "
-    >
+      ">
       <div class="lable">UploadSharedDir</div>
       <div class="switch">
         <el-switch v-model="iniData.UploadSharedDir"></el-switch>
@@ -83,16 +70,19 @@
       <div class="tips">{{ $t("dispose.isUpload") }}</div>
     </div>
 
-    <div
-      class="row"
-      style="
+    <div class="row">
+      <div class="lable">AuthorizationCode</div>
+      <el-input v-model="iniData.AuthorizationCode" :placeholder="$t('dispose.authCodePlaceholder')"></el-input>
+      <div class="tips">{{ $t("dispose.authCodeTips") }}</div>
+    </div>
+
+    <div class="row" style="
         align-items: flex-start;
         justify-content: flex-end;
         margin-top: 40px;
         margin-right: 40px;
         height: 300px;
-      "
-    >
+      ">
       <el-button @click="save">{{ $t("work.submit") }}</el-button>
     </div>
   </div>
@@ -146,7 +136,18 @@ export default {
           label: "FATAL",
         },
       ],
-      iniData: null,
+      iniData: {
+        LogLevel: 'INFO',
+        AutoRetryTimes: 0,
+        TaskDir: '',
+        SharedDir: '',
+        RejectConfig: false,
+        StopOnFailure: false,
+        KeepCombinedImage: false,
+        CleanTaskFile: false,
+        UploadSharedDir: false,
+        AuthorizationCode: ''
+      },
 
       AutoRetryTimes: null,
       LogLevel: "TRACE",
@@ -205,34 +206,35 @@ export default {
           that.iniData.LogLevel = data.LogLevel ? data.LogLevel : "";
           that.iniData.CleanTaskFile =
             data.CleanTaskFile == "true" ||
-            data.CleanTaskFile == "True" ||
-            data.CleanTaskFile
+              data.CleanTaskFile == "True" ||
+              data.CleanTaskFile
               ? true
               : false;
           that.iniData.KeepCombinedImage =
             data.KeepCombinedImage == "true" ||
-            data.KeepCombinedImage == "True" ||
-            data.KeepCombinedImage
+              data.KeepCombinedImage == "True" ||
+              data.KeepCombinedImage
               ? true
               : false;
           that.iniData.RejectConfig =
             data.RejectConfig == "true" ||
-            data.RejectConfig == "True" ||
-            data.RejectConfig
+              data.RejectConfig == "True" ||
+              data.RejectConfig
               ? true
               : false;
           that.iniData.StopOnFailure =
             data.StopOnFailure == "true" ||
-            data.StopOnFailure == "True" ||
-            data.StopOnFailure
+              data.StopOnFailure == "True" ||
+              data.StopOnFailure
               ? true
               : false;
           that.iniData.UploadSharedDir =
             data.UploadSharedDir == "true" ||
-            data.UploadSharedDir == "True" ||
-            data.UploadSharedDir
+              data.UploadSharedDir == "True" ||
+              data.UploadSharedDir
               ? true
               : false;
+          that.iniData.AuthorizationCode = data.AuthorizationCode ? data.AuthorizationCode : "";
           console.log(data);
         }
       });
@@ -298,6 +300,7 @@ export default {
   -moz-box-sizing: border-box;
   display: flex;
   flex-direction: column;
+
   .title {
     font-size: 14px;
     font-weight: bold;
@@ -310,38 +313,45 @@ export default {
     align-items: center;
     background-color: rgb(240, 240, 240);
   }
+
   .row {
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
     align-items: center;
     margin-top: 20px;
+
     .lable {
       width: 200px;
       margin-left: 20px;
       font-size: 14px;
       text-align: left;
     }
+
     .el-input {
       width: 200px;
       margin-left: 20px;
     }
+
     .el-select {
       width: 200px;
       margin-left: 20px;
     }
+
     .switch {
       display: flex;
       margin-left: 20px;
       justify-content: flex-start;
       width: 200px;
     }
+
     .tips {
       font-size: 14px;
       margin-left: 20px;
       width: calc(100% - 440px);
       text-align: left;
     }
+
     .el-button {
       color: rgb(154, 202, 128);
       width: 120px;
@@ -350,12 +360,15 @@ export default {
       border-radius: 1px;
       box-shadow: 1px 0px 2px 0px grey;
     }
+
     .el-button:hover {
       background-color: white;
     }
+
     .el-button:active {
       background-color: white;
     }
+
     .el-button:focus {
       background-color: white;
     }

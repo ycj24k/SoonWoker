@@ -21,12 +21,6 @@
                     </transition>
                 </div>
             </el-col>
-            <el-col :span="12">
-                <el-form-item :label="$t('work.setAuthCode') || '授权码'" label-width="80px">
-                    <el-input size="small" v-model="form.auth_code"
-                        :placeholder="$t('work.inputAuthCode') || '输入授权码'" />
-                </el-form-item>
-            </el-col>
         </el-row>
     </div>
 </template>

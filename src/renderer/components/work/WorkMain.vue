@@ -167,6 +167,19 @@ export default {
             switch_tag: true,
             submitLoading: false,
 
+            // 新手引导
+            guideStep: null,
+            currentStep: 0,
+
+            // 文件相关
+            file_name3: '',
+            zip_attrs: { accept: '.zip' },
+            iso_attrs: { accept: 'iso/img' },
+
+            // 辅助字段
+            flag: false,
+            isPass: false,
+            filter_rules: [[0], [1, 5], [0], [0], [3]],
             flag_cont_up: false,
             customColors: [
                 { color: '#67C23A', percentage: 99 },
@@ -204,8 +217,7 @@ export default {
                 zip_repassword: '',
                 copy_hash: false,
                 is_dongle_count: false,
-                dongle_count: 0,
-                auth_code: ''
+                dongle_count: 1
             }
         }
     },
@@ -217,6 +229,33 @@ export default {
             let per = (this.size / (1024 * 1024) / mb) * 100
             if (isNaN(per) || !isFinite(per)) return 0
             return per > 100 ? 100 : parseFloat(per.toFixed(1))
+        },
+        // 打印选项
+        print_op() {
+            return [
+                { value: 2, label: this.$t('work.front') },
+                { value: 3, label: this.$t('work.back') },
+                { value: 1, label: this.$t('work.double') }
+            ]
+        },
+        // 分区类型
+        type() {
+            return [
+                { value: 0, label: this.$t('work.diskPart') },
+                { value: 1, label: this.$t('work.cdPart') },
+                { value: 3, label: this.$t('work.forbidCopyPart') },
+                { value: 5, label: this.$t('work.cdWithDisk') }
+            ]
+        },
+        // 文件类型
+        file_type() {
+            return [
+                { value: 0, label: this.$t('work.fileAnd') },
+                { value: 1, label: this.$t('work.eCd') },
+                { value: 2, label: this.$t('work.zip') },
+                { value: 3, label: this.$t('work.passZip') },
+                { value: 4, label: this.$t('work.forbidCopyU') }
+            ]
         }
     },
     created() {
@@ -258,6 +297,16 @@ export default {
             this.print_flag = this.dice === 1 ? 2 : 1
             this.loadNetworkCredentials()
             this.getTemplates()
+
+            // 加载新手引导
+            this.guideStep = JSON.parse(localStorage.getItem('guideStep'))
+            this.currentStep = localStorage.getItem('currentStep')
+            if (this.guideStep && this.guideStep[this.currentStep]) {
+                this.guideStep[this.currentStep].show = false
+                setTimeout(() => {
+                    this.guideStep[this.currentStep].show = true
+                }, 200)
+            }
         },
 
         // --- 高级设置与录制 ---
@@ -336,9 +385,51 @@ export default {
             try {
                 const data = JSON.parse(content)
                 this.fileData = data
-                this.tableData = data.tableData || []
+                this.form = {}
+                this.tableData = []
+
+                // 解析正面数据字段
+                if (data.frontData && Array.isArray(data.frontData)) {
+                    data.frontData.forEach(item => {
+                        if ([1, 3, 4, 5].includes(item.type)) {
+                            const defaultVal = item.DefaultText !== undefined ? item.DefaultText : ''
+                            this.tableData.push({
+                                name: item.name + this.$t('work.front_tag'),
+                                val: defaultVal,
+                                origin_name: item.name,
+                                type: item.type,
+                                default: item.DefaultText
+                            })
+                            this.$set(this.form, item.name, defaultVal)
+                        }
+                    })
+                }
+
+                // 解析背面数据字段
+                if (data.backData && Array.isArray(data.backData)) {
+                    data.backData.forEach(item => {
+                        if ([1, 3, 4, 5].includes(item.type)) {
+                            const defaultVal = item.DefaultText !== undefined ? item.DefaultText : ''
+                            this.tableData.push({
+                                name: item.name + this.$t('work.back_tag'),
+                                val: defaultVal,
+                                origin_name: item.name,
+                                type: item.type,
+                                default: item.DefaultText
+                            })
+                            this.$set(this.form, item.name, defaultVal)
+                        }
+                    })
+                }
+
+                // 清空文件选择器
+                if (this.$refs.refFile2) this.$refs.refFile2.value = ''
+                if (this.$refs.refFile3) this.$refs.refFile3.value = ''
+                this.csvIsExist = false
+                this.file_name = null
                 this.currentTemplate = ''
             } catch (e) {
+                console.error('解析标签文件失败:', e)
                 this.$message.error('无效的标签文件')
             }
         },
@@ -382,7 +473,15 @@ export default {
         changeTemplate(templatePath) {
             if (!templatePath) return
             fs.readFile(templatePath, 'utf8', (err, data) => {
-                if (!err) this.readFile(data)
+                if (err) {
+                    console.error('读取模板文件时出错:', err)
+                    this.$message.error('读取模板文件失败')
+                    return
+                }
+                // 创建文件对象保存到fileLists，与手动导入保持一致
+                const fileName = path.basename(templatePath)
+                this.fileLists[0] = new File([data], fileName, { type: '' })
+                this.readFile(data)
             })
         },
 
@@ -558,7 +657,6 @@ export default {
             data += `&copy_hash=${!!this.high_setting_form.copy_hash}`
             data += `&enable_dongle_counter=${!!this.high_setting_form.is_dongle_count}`
             data += `&donglel_install_count=${this.high_setting_form.dongle_count || 0}`
-            data += `&auth_code=${encodeURIComponent(this.high_setting_form.auth_code || '')}`
 
             // 录像与标识
             data += `&is_blend=${!!this.high_setting_form.is_blend}`
@@ -640,9 +738,6 @@ export default {
                     this.submitLoading = false
                 })
             } catch (e) {
-                console.error(e)
-                this.$message.error('Failed to create file list')
-                this.submitLoading = false
             }
         },
         saveWork() {
@@ -660,6 +755,147 @@ export default {
             }).then(result => {
                 if (result.filePath) fs.writeFileSync(result.filePath, JSON.stringify(save))
             })
+        },
+
+        // --- 新手引导功能 ---
+        exitGuide() {
+            for (let key in this.guideStep) {
+                this.guideStep[key].show = false
+            }
+            this.currentStep = -1
+            localStorage.setItem('currentStep', this.currentStep)
+            localStorage.setItem('guideStep', JSON.stringify(this.guideStep))
+        },
+        prevStep() {
+            this.guideStep[this.currentStep].show = false
+            this.currentStep = parseInt(this.currentStep) - 1
+            if (this.guideStep[this.currentStep]) {
+                this.guideStep[this.currentStep].show = true
+                localStorage.setItem('guideStep', JSON.stringify(this.guideStep))
+                localStorage.setItem('currentStep', this.currentStep)
+            } else {
+                this.exitGuide()
+            }
+        },
+        nextStep() {
+            this.guideStep[this.currentStep].show = false
+            this.currentStep = parseInt(this.currentStep) + 1
+            if (this.guideStep[this.currentStep]) {
+                this.guideStep[this.currentStep].show = true
+                localStorage.setItem('guideStep', JSON.stringify(this.guideStep))
+                localStorage.setItem('currentStep', this.currentStep)
+            } else {
+                this.exitGuide()
+            }
+        },
+        help() {
+            ipcRenderer.send('open-help-file')
+        },
+
+        // --- 工具方法 ---
+        toChar(n) {
+            return String.fromCharCode(65 + parseInt(n))
+        },
+        getPrintName(id) {
+            return this.$t('index.wordSpace') + id.substr(-5)
+        },
+        getPrintName1(id) {
+            for (let i = 0; i < this.printerList.length; i++) {
+                if (this.printerList[i].PrinterID == id) {
+                    return this.$t('index.wordSpace') + this.toChar(i)
+                }
+            }
+        },
+
+        // --- 网络认证增强 ---
+        getHostFromPath(p) {
+            if (!p || typeof p !== 'string') return ''
+            if (p.indexOf('\\\\') === 0) {
+                const parts = p.slice(2).split('\\')
+                return parts[0] || ''
+            }
+            if (p.indexOf('//') === 0) {
+                const parts = p.slice(2).split('/')
+                return parts[0] || ''
+            }
+            const m = p.match(/^([^\\\\/: ]+)/)
+            return (m && m[1]) ? m[1] : ''
+        },
+        checkNetworkPaths() {
+            if (!(this.$refs.files && this.$refs.files.hasNetworkPaths())) {
+                return false
+            }
+            const networkPaths = this.$refs.files.getNetworkPaths() || []
+            if (networkPaths.length === 0) return false
+
+            let stored = {}
+            try {
+                stored = JSON.parse(localStorage.getItem('networkCredentials') || '{}')
+            } catch (e) {
+                stored = {}
+            }
+
+            const missing = []
+            const prepared = []
+            for (const item of networkPaths) {
+                const host = item.hostName || this.getHostFromPath(item.path) || ''
+                if (host && stored[host] && stored[host].userName && stored[host].password) {
+                    prepared.push({
+                        host_name: host,
+                        user_name: stored[host].userName,
+                        password: stored[host].password,
+                    })
+                } else {
+                    missing.push({ ...item, hostName: host })
+                }
+            }
+
+            if (missing.length > 0) {
+                this.networkAuthPaths = missing.map(m => ({
+                    path: m.path,
+                    hostName: m.hostName,
+                    userName: '',
+                    password: ''
+                }))
+                this.networkAuthVisible = true
+                this.networkCredentials = prepared
+                return true
+            }
+
+            this.networkCredentials = prepared
+            return false
+        },
+
+        // --- 文件管理方法 ---
+        handleContentCommand(command) {
+            if (command === 'folder') {
+                this.addFolder()
+            } else {
+                this.addFile()
+            }
+        },
+        addFolder() {
+            if (this.$refs.files) {
+                this.$refs.files.addFolder()
+            }
+        },
+        addFile() {
+            if (this.$refs.files) {
+                this.$refs.files.addFile()
+            }
+        },
+        fileLoad3() {
+            if (this.$refs.refFile3 && this.$refs.refFile3.files[0]) {
+                this.file_name3 = this.$refs.refFile3.files[0].name
+            }
+        },
+        openFile3() {
+            if (this.$refs.refFile3) {
+                this.$refs.refFile3.click()
+            }
+        },
+        sizeChange(size) {
+            this.size = size
         }
     }
 }

@@ -93,6 +93,8 @@ export default {
     successReserve: "保存成功! ",
     errorRead: "讀取設定檔失敗! ",
     configTitle: "系統配寘",
+    authCodePlaceholder: "請輸入授權碼",
+    authCodeTips: "系統授權碼,用於啟動進階功能和許可驗證"
   },
   dialog: {
     closeTips: "0.5秒後將自動關閉…… ",

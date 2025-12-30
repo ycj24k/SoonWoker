@@ -9,24 +9,14 @@
             state == null
               ? this.$t("systemControl.detecting")
               : state
-              ? this.$t("systemControl.start")
-              : this.$t("systemControl.stop")
+                ? this.$t("systemControl.start")
+                : this.$t("systemControl.stop")
           }}</span>
           <div>{{ $t("systemControl.tips1") }}</div>
         </div>
         <div class="serviceImg">
-          <el-button
-            icon="el-icon-video-play"
-            circle
-            @click="play"
-            :disabled="state || state == null"
-          ></el-button>
-          <el-button
-            icon="el-icon-video-pause"
-            circle
-            @click="pause"
-            :disabled="!state || state == null"
-          ></el-button>
+          <el-button icon="el-icon-video-play" circle @click="play" :disabled="state || state == null"></el-button>
+          <el-button icon="el-icon-video-pause" circle @click="pause" :disabled="!state || state == null"></el-button>
         </div>
       </div>
     </div>
@@ -36,12 +26,8 @@
         <div class="select">
           <div class="lable">{{ $t("systemControl.selectWorkstation") }}</div>
           <el-select v-model="workValue">
-            <el-option
-              v-for="item in printData"
-              :key="item.PrinterID"
-              :label="getPrintName(item.PrinterID)"
-              :value="item.PrinterID"
-            >
+            <el-option v-for="item in printData" :key="item.PrinterID" :label="getPrintName(item.PrinterID)"
+              :value="item.PrinterID">
             </el-option>
           </el-select>
         </div>
@@ -118,27 +104,18 @@
         <div class="select">
           <div class="lable">{{ $t("systemControl.refreshTime1") }}</div>
           <el-input v-model="refreshTime1" type="number" style="width: 300px">
-            <el-button
-              slot="append"
-              icon="el-icon-finished"
-              @click="handleSaveTime1"
-            ></el-button>
-            ></el-input
-          >
+            <el-button slot="append" icon="el-icon-finished" @click="handleSaveTime1"></el-button>
+            ></el-input>
         </div>
         <div class="select">
           <div class="lable">{{ $t("systemControl.refreshTime2") }}</div>
           <el-input v-model="refreshTime2" type="number" style="width: 300px">
-            <el-button
-              slot="append"
-              icon="el-icon-finished"
-              @click="handleSaveTime2"
-            ></el-button
-          ></el-input>
+            <el-button slot="append" icon="el-icon-finished" @click="handleSaveTime2"></el-button></el-input>
         </div>
         <div class="select">
           <div class="lable">{{ $t("systemControl.guide") }}</div>
-          <el-switch @change="changeStep" v-model="showStep" :active-text="$t('systemControl.show')" :inactive-text="$t('systemControl.hide')"></el-switch>
+          <el-switch @change="changeStep" v-model="showStep" :active-text="$t('systemControl.show')"
+            :inactive-text="$t('systemControl.hide')"></el-switch>
         </div>
       </div>
     </div>
@@ -147,12 +124,7 @@
       <div class="select">
         <div class="lable">{{ $t("systemControl.changeLanguage") }}</div>
         <el-select v-model="selectLan">
-          <el-option
-            v-for="item in languages"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value"
-          >
+          <el-option v-for="item in languages" :key="item.value" :label="item.label" :value="item.value">
           </el-option>
         </el-select>
       </div>
@@ -323,7 +295,7 @@ export default {
     //  );
     //}, 2000);
     //this.workValue = !this.printData ? null : this.printData[0].PrinterID;
-    if (!localStorage.getItem('hideStep')||localStorage.getItem('hideStep')==0) this.showStep = true
+    if (!localStorage.getItem('hideStep') || localStorage.getItem('hideStep') == 0) this.showStep = true
   },
   beforeDestroy() {
     this.timer = null;
@@ -360,11 +332,20 @@ export default {
         method: "get",
         url: "/web/get_printer_info",
       }).then((res) => {
+        if (!res.data || !res.data.printerList) {
+          console.warn('获取工作站列表返回的数据格式不正确:', res)
+          this.printData = []
+          return
+        }
         this.printData = res.data.printerList;
         if (this.printData.length != 0) {
           //自动选择第一个
           this.workValue = this.printData[0].PrinterID;
         }
+      }).catch((e) => {
+        console.error('获取工作站列表失败:', e)
+        this.printData = []
+        this.$message.error('获取工作站列表失败，请检查网络连接')
       });
     },
     checkServerState(callback) {
@@ -779,12 +760,14 @@ export default {
   box-sizing: border-box;
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
+
   .restart {
     width: 100%;
     height: 180px;
     display: flex;
     flex-direction: column;
     border-bottom: 1px rgb(224, 224, 224) solid;
+
     .title {
       font-size: 14px;
       width: 300px;
@@ -797,27 +780,32 @@ export default {
       background-color: rgb(240, 240, 240);
       font-weight: bold;
     }
+
     .service {
       width: 100%;
       height: 120px;
       display: flex;
       justify-content: flex-start;
       align-items: center;
+
       .tips {
         color: rgb(94, 94, 94);
         font-size: 14px;
         margin-left: 20px;
       }
+
       .serviceImg {
         display: flex;
         justify-content: center;
         align-items: center;
         flex-direction: row;
         margin-left: 100px;
+
         .begin {
           width: 55px;
           height: 55px;
         }
+
         .stop {
           margin-left: 5px;
           width: 50px;
@@ -826,12 +814,14 @@ export default {
       }
     }
   }
+
   .control {
     width: 100%;
     height: 420px;
     display: flex;
     flex-direction: column;
     border-bottom: 1px rgb(224, 224, 224) solid;
+
     .title {
       margin-top: 20px;
       font-size: 14px;
@@ -845,9 +835,11 @@ export default {
       background-color: rgb(240, 240, 240);
       font-weight: bold;
     }
+
     .service {
       display: flex;
       flex-direction: column;
+
       .select {
         display: flex;
         flex-direction: row;
@@ -865,10 +857,12 @@ export default {
           width: 150px;
           margin-left: 20px;
         }
+
         .el-select {
           width: 180px;
         }
       }
+
       .concrete {
         display: flex;
         flex-direction: row;
@@ -894,6 +888,7 @@ export default {
           flex-wrap: wrap;
           justify-content: flex-start;
           align-items: flex-start;
+
           .el-button {
             width: 180px;
             height: 35px;
@@ -911,15 +906,19 @@ export default {
             border-radius: 1px;
             box-shadow: 1px 0px 2px 0px grey;
           }
+
           .el-button:nth-child(4) {
             margin-left: 0 !important;
           }
+
           .el-button:hover {
             background-color: white;
           }
+
           .el-button:active {
             background-color: white;
           }
+
           .el-button:focus {
             background-color: white;
           }
@@ -927,11 +926,13 @@ export default {
       }
     }
   }
+
   .languageer {
     width: 100%;
     height: 220px;
     display: flex;
     flex-direction: column;
+
     .title {
       margin-top: 20px;
       font-size: 14px;
@@ -945,6 +946,7 @@ export default {
       background-color: rgb(240, 240, 240);
       font-weight: bold;
     }
+
     .select {
       display: flex;
       flex-direction: row;
@@ -952,12 +954,14 @@ export default {
       align-items: flex-start;
       margin-left: 20px;
       margin-top: 20px;
+
       .lable {
         margin-top: 5px;
         font-size: 14px;
         width: 150px;
         text-align: left;
       }
+
       .el-select {
         width: 180px;
       }
