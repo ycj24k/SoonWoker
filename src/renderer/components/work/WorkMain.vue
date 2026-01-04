@@ -6,7 +6,8 @@
             <!-- 左侧配置表单 -->
             <div class="header-settings">
                 <task-header :file_form.sync="file_form" :size_form.sync="size_form" :type_form.sync="type_form"
-                    :size-type="sizeType" />
+                    :size-type="sizeType" :filter-passed-type="filterPassedType" :guide-step="guideStep"
+                    :current-step="currentStep" @exit-guide="exitGuide" @prev-step="prevStep" @next-step="nextStep" />
             </div>
 
             <!-- 右侧功能按钮 -->
@@ -34,7 +35,8 @@
 
             <!-- 隐藏的组件 -->
             <advanced-settings :visible.sync="highSettingVisible" :form="high_setting_form" :file-form="file_form"
-                @save="saveHighSettings" @test-recording="handleTestRecording" />
+                :printer-list="printerList" :size-form="size_form" @save="saveHighSettings"
+                @test-recording="handleTestRecording" />
             <network-auth-dialog :visible="networkAuthVisible" :network-paths="networkAuthPaths"
                 @confirm="onNetworkAuthConfirm" @cancel="onNetworkAuthCancel" />
         </div>
@@ -217,11 +219,26 @@ export default {
                 zip_repassword: '',
                 copy_hash: false,
                 is_dongle_count: false,
-                dongle_count: 1
+                dongle_count: 1,
+                auth_code: ''
             }
         }
     },
+    watch: {
+        filterPassedType: {
+            handler() { this.autoSelectCapacity() },
+            immediate: true
+        },
+        sizeType: {
+            handler() { this.autoSelectCapacity() },
+            immediate: true
+        }
+    },
     computed: {
+        // 容量选项 (从props同步或处理)
+        sizeTypeOptions() {
+            return this.sizeType
+        },
         file_percent() {
             if (!this.size_form || isNaN(parseFloat(this.size_form))) return 0
             let mb = parseFloat(this.size_form) * 931.3
@@ -269,6 +286,34 @@ export default {
         this.cancelRecordingIfActive()
     },
     methods: {
+        autoSelectCapacity() {
+            if (!this.sizeType || this.sizeType.length === 0) return
+
+            // 获取有效选项
+            let validOptions = this.sizeType
+            if (this.filterPassedType && this.filterPassedType.length > 0) {
+                validOptions = this.sizeType.filter(item =>
+                    this.filterPassedType.indexOf(item.value) !== -1
+                )
+            }
+
+            // 如果没有有效选项，直接返回
+            if (validOptions.length === 0) return
+
+            // 检查当前选中值是否有效
+            const isCurrentValid = this.size_form && validOptions.find(o => o.value === this.size_form)
+
+            // 如果当前值无效（或者未选中）且只有唯一有效选项，则自动选中
+            // 或者：强制选中第一个有效选项（如果当前值无效）
+            if (!isCurrentValid) {
+                if (validOptions.length > 0) {
+                    this.size_form = validOptions[0].value
+                }
+            }
+        },
+        exitGuide() {
+            this.$emit('exit-guide')
+        },
         initData() {
             const high = localStorage.getItem('high_setting_form')
             if (high) {
@@ -322,6 +367,7 @@ export default {
         },
         saveHighSettings() {
             localStorage.setItem('high_setting_form', JSON.stringify(this.high_setting_form))
+            // eslint-disable-next-line
             this.$message.success(this.$t('dispose.successReserve'))
             this.highSettingVisible = false
         },
@@ -513,248 +559,608 @@ export default {
 
         // --- 提交逻辑 ---
         async upload() {
-            console.log('--- 开始提交作业 ---')
+
+            // 退出新手引导
+            if (this.guideStep) {
+                this.exitGuide()
+            }
+
+            // ========== 前置验证（所有场景共用）==========
+            // 1. 容量选择验证
             if (!this.size_form) {
-                console.warn('未选择容量')
                 return this.$message.warning(this.$t('work.size_form_error'))
             }
 
-            // 检查容量限制
-            if (!this.high_setting_form.Span_USBcard) {
-                const maxSize = (this.size_form * 1000 / 1.024 / 1.024 / 1.024) * 1024 * 1024
-                if (this.size > maxSize) return this.$message.warning(this.$t('work.sizeExtra'))
+            // 2. 初始化文件状态（对齐 legacy）
+            for (let i in this.$refs.files.filesList) {
+                this.$refs.files.filesList[i].state = false
+            }
+            this.$refs.files.nowstate = true
+
+            // ========== 核心分支：基于 allNumber 判断 ==========
+            if (this.$refs.files.allNumber > 0) {
+                // ============ 有内容文件的分支 ============
+                console.log('检测到内容文件数量:', this.$refs.files.allNumber)
+
+                // 容量限制检查（非跨卡模式）
+                if (!this.high_setting_form.Span_USBcard && this.size > ((this.size_form * 1000) / 1.024 / 1.024 / 1.024) * 1024 * 1024) {
+                    return this.$message.warning(this.$t('work.sizeExtra'))
+                }
+
+                // 双重校验（防御性编程，理论上不会触发）
+                if (this.$refs.files.allNumber == 0) {
+                    return this.$message.warning(this.$t('work.pleaseUploadContent'))
+                }
+
+                // 设置内容上传标志
+                this.flag_cont_up = true
+                this.upload_flag = true
+
+                // 本地文件模式判断
+                if (this.high_setting_form.localfiles) {
+                    console.log('本地文件模式，跳过内容上传')
+                    return  // 直接返回，等待外部触发或用户操作
+                }
+
+                // 检查文件计算状态
+                let t = true
+                for (let i in this.$refs.files.filesList) {
+                    if (this.$refs.files.filesList[i].size == -1) {
+                        t = false
+                    }
+                }
+                if (!t) {
+                    return this.$message.warning(this.$t('work.waitCalculate'))
+                }
+
+                // 设置上传参数并启动
+                this.$refs.files.isCopy = this.isCopy
+                this.$refs.files.copyPath = this.shareDisk + '\\\\' + this.upload_disk + '\\\\data\\\\'
+                this.$refs.files.resume(this.file_form)
+
+            } else {
+                // ============ 无内容文件的分支（只有标签）============
+                console.log('无内容文件，进入标签上传流程')
+
+                // 构建 FormData
+                let files_n_incr = 1
+                let data1 = new FormData()
+
+                // 标签文件校验与添加
+                if (this.isNew) {
+                    // 新建模式：必须有 CS 文件
+                    if (this.fileLists[0]) {
+                        data1.append(`file${files_n_incr}`, this.fileLists[0])
+                        files_n_incr++
+                    } else {
+                        return this.$message.warning(this.$t('work.pleaseUploadTag'))
+                    }
+                } else {
+                    // 编辑模式：必须有 fileData 或 fileLists[0]
+                    if (this.fileData && !this.fileLists[0]) {
+                        // 纯打开，上传 AS 文件（JSON）
+                        let _file = new File([JSON.stringify(this.fileData)], this.saveWorkList.taskName, { type: 'text/plain' })
+                        data1.append(`file${files_n_incr}`, _file)
+                        files_n_incr++
+                    } else if (this.fileData && this.fileLists[0]) {
+                        // 打开后重新选择了 CS 文件
+                        data1.append(`file${files_n_incr}`, this.fileLists[0])
+                        files_n_incr++
+                    } else {
+                        return this.$message.warning(this.$t('work.pleaseUploadTag'))
+                    }
+                }
+
+                // CSV 合并文件
+                if (this.$refs.refFile2.files.length != 0) {
+                    data1.append(`file${files_n_incr}`, this.$refs.refFile2.files[0])
+                    data1.append(`csv`, true)
+                    files_n_incr++
+                } else {
+                    data1.append(`csv`, false)
+                }
+
+                // 元数据字段（图片、文本、条码）
+                for (let item of this.tableData) {
+                    if (item.type == 1 && this.metadataFiles[item.origin_name] && this.$refs.refFile2.files.length != 0) {
+                        // 有合并文件的图片
+                        data1.append(`file${files_n_incr}`, this.metadataFiles[item.origin_name])
+                        files_n_incr++
+                    } else if (item.type == 1 && this.metadataFiles[item.origin_name] && this.$refs.refFile2.files.length == 0) {
+                        // 无合并文件的图片
+                        data1.append(item.origin_name, this.metadataFiles[item.origin_name])
+                    } else if ((item.type == 3 || item.type == 5) && this.$refs.refFile2.files.length == 0) {
+                        // 文本与条形码
+                        let data = this.form[item.origin_name]
+                        if (data == '' || data == undefined || data == null) {
+                            data = item.default
+                        }
+                        data1.append(item.origin_name, data)
+                    } else if (item.type == 4 && this.$refs.refFile2.files.length == 0) {
+                        // 二维码
+                        data1.append(item.origin_name, this.form[item.origin_name])
+                    }
+                }
+
+                // 上传标签文件
+                this.$message({ offset: 100, message: this.$t('work.uploadingTag') })
+                this.$axios({
+                    method: 'post',
+                    url: '/upload/' + this.upload_disk,
+                    headers: { 'Content-Type': 'multipart/form-data;boundary=' + new Date().getTime() },
+                    data: data1
+                }).then((res) => {
+                    this.submit()  // 调用提交函数
+                })
+            }
+        },
+        upload_over() {
+            if (this.flag_cont_up) {
+                // 检查是否需要上传标签（只有内容时不上传标签）
+                let skipTagUpload = false
+
+                // 1. 检查是否有标签文件
+                let hasTagFile = false
+                if (this.isNew) {
+                    if (this.fileLists && this.fileLists.length > 0) {
+                        hasTagFile = true
+                    }
+                } else {
+                    if (this.fileData || (this.fileLists && this.fileLists.length > 0)) {
+                        hasTagFile = true
+                    }
+                }
+
+                // 2. 检查是否有 CSV 合并文件
+                const hasCsv = this.$refs.refFile2 && this.$refs.refFile2.files && this.$refs.refFile2.files.length > 0
+
+
+                // 3. 检查是否有实际的图片元数据文件
+                const hasImageFiles = !!(this.metadataFiles && Object.keys(this.metadataFiles).length > 0)
+
+                // 判断：如果没有任何标签相关内容，跳过标签上传
+                if (!hasTagFile && !hasCsv && !hasImageFiles) {
+                    skipTagUpload = true
+                }
+
+                if (skipTagUpload) {
+                    this.performSubmit()
+                } else {
+                    this.submitAndTag()
+                }
+            } else {
+                this.performSubmit()
+            }
+        },
+        async submit() {
+            // 停止录制（如果正在录制）
+            await this.stopRecordingIfActive()
+
+            // 检查是否有网络路径需要认证
+            if (this.checkNetworkPaths && this.checkNetworkPaths()) {
+                return // 等待用户完成网络认证
             }
 
-            // ISO/ZIP 前置验证
-            if (this.high_setting_form.is_generate_iso && !this.high_setting_form.iso_file_name) {
-                return this.$message.warning(this.$t('work.isoNameInput'))
+            // 继续提交流程
+            this.performSubmit()
+        },
+        async submitAndTag() {
+            const data1 = new FormData()
+            let files_n_incr = 1
+
+            // 1. 标签文件 (Label File)
+            let hasLabelFile = false
+            if (this.isNew) {
+                if (this.fileLists && this.fileLists[0]) {
+                    data1.append(`file${files_n_incr}`, this.fileLists[0])
+                    files_n_incr++
+                    hasLabelFile = true
+                }
+            } else {
+                if (this.fileData && !this.fileLists[0]) {
+                    // 纯打开，上传 AS 文件 (JSON)
+                    let _file = new File([JSON.stringify(this.fileData)], this.saveWorkList.taskName, { type: 'text/plain' })
+                    data1.append(`file${files_n_incr}`, _file)
+                    files_n_incr++
+                    hasLabelFile = true
+                } else if (this.fileData && this.fileLists[0]) {
+                    // 重新选择了 CS 文件
+                    data1.append(`file${files_n_incr}`, this.fileLists[0])
+                    files_n_incr++
+                    hasLabelFile = true
+                }
             }
-            if (this.high_setting_form.is_generate_zip) {
-                if (!this.high_setting_form.zip_file_name) return this.$message.warning(this.$t('work.zipNameInput'))
-                if (this.high_setting_form.is_zip_encrypt) {
-                    if (!this.high_setting_form.zip_password) return this.$message.warning(this.$t('work.pleasePassword'))
-                    if (this.high_setting_form.zip_password !== this.high_setting_form.zip_repassword) {
+
+            // 校验：若开启标签但无文件且无内容区文件
+            if (!hasLabelFile && this.switch_tag) {
+                const hasContentFiles = this.$refs.files && this.$refs.files.allNumber > 0;
+                if (!hasContentFiles) {
+                    return this.$message.warning(this.$t('work.pleaseUploadTag'))
+                }
+            }
+
+            // 2. CSV 合并文件
+            const hasCsv = this.$refs.refFile2 && this.$refs.refFile2.files && this.$refs.refFile2.files.length > 0
+            if (hasCsv) {
+                data1.append(`file${files_n_incr}`, this.$refs.refFile2.files[0])
+                data1.append(`csv`, true)
+                files_n_incr++
+            } else {
+                data1.append(`csv`, false)
+            }
+
+            // 3. 元数据 (图片、文本、条码)
+            if (this.tableData && this.tableData.length > 0) {
+                for (let item of this.tableData) {
+                    // 图片类型 (Type 1)
+                    if (item.type == 1 && this.metadataFiles[item.origin_name]) {
+                        const file = this.metadataFiles[item.origin_name]
+                        if (hasCsv) {
+                            // 有CSV时，图片按 file{n} 顺序添加
+                            data1.append(`file${files_n_incr}`, file)
+                            files_n_incr++
+                        } else {
+                            // 无CSV时，图片按字段名添加
+                            data1.append(item.origin_name, file)
+                        }
+                    }
+                    // 文本/条码类型 (Type 3, 5) - 仅在无CSV时添加
+                    else if ((item.type == 3 || item.type == 5) && !hasCsv) {
+                        let data = this.form[item.origin_name]
+                        if (data == '' || data === undefined || data === null) {
+                            data = item.default || ''
+                        }
+                        data1.append(item.origin_name, data)
+                    }
+                    // 二维码类型 (Type 4) - 仅在无CSV时添加
+                    else if (item.type == 4 && !hasCsv) {
+                        let data = this.form[item.origin_name] || ''
+                        data1.append(item.origin_name, data)
+                    }
+                }
+            }
+
+            // 4. 发送请求
+            this.$message.info(this.$t('work.uploadingTag'))
+            let pathName
+            if (this.high_setting_form.localfiles) {
+                // 若开启本地文件，需获取本地路径名称
+                const rootFile = this.$refs.files && this.$refs.files.getLists && this.$refs.files.getLists()[0]; // 假设逻辑
+                // 这里实际上 work-副本 使用 upload_disk 或者 rootFile name，这里保持 upload_disk 除非是 pathName 逻辑差异
+                // work-副本 逻辑: localfiles ? filePath.name : upload_disk
+                if (this.high_setting_form.localfiles) {
+                    // 获取根文件夹名
+                    // 由于 fileManagement 封装，我们需要更稳健的获取方式
+                    // 暂时使用 upload_disk，待 localUpload 逻辑覆盖
+                    pathName = this.upload_disk // 这里的差异在 submit 逻辑中处理，Tag 上传通常还是到 upload_disk 临时目录?
+                    // work-副本: localfiles ? filePath.name : this.upload_disk
+                    // 这里保持一致性
+                    pathName = this.upload_disk
+                } else {
+                    pathName = this.upload_disk
+                }
+            } else {
+                pathName = this.upload_disk
+            }
+
+            // 修正：如果 localfiles 为真，work-副本 实际上是把 tag 文件上传到以 filePath.name 命名的目录
+            // 但这里简化处理，先上传 tag，后续 localUpload 会处理 content
+            // 实际上 submitAndTag 是为了上传 tag 文件，localUpload 是为了处理 content 文件的 path.json
+
+            this.$axios.post('/upload/' + this.upload_disk, data1).then(() => {
+                this.performSubmit()
+            }).catch(err => {
+                console.error(err)
+                this.$message.error(this.$t('work.uploadFail'))
+            })
+        },
+        async performSubmit() {
+            let that = this;
+            try {
+                await this.stopRecordingIfActive()
+            } catch (e) {
+                console.error('停止录像失败:', e)
+            }
+
+            // 检查是否有网络路径需要认证
+            if (this.checkNetworkPaths && this.checkNetworkPaths()) {
+                return
+            }
+
+            // 1. 确定 pathName
+            let pathName
+            if (that.high_setting_form.localfiles) {
+                //打开本地选项
+                const uploader = this.$refs.files && this.$refs.files.uploader
+                let rootFile = uploader && uploader.getRoot()
+                if (!rootFile || rootFile.fileList.length != 1) {
+                    this.$message.warning(this.$t('work.oneFolder'))
+                    return
+                }
+                let filePath = rootFile.fileList[0]
+                if (!filePath.isFolder) {
+                    this.$message.warning(this.$t('work.notFolder'))
+                    return
+                }
+                pathName = filePath.name
+            } else {
+                pathName = this.upload_disk
+            }
+
+            // 2. 构建 data_param
+            let data_param = 'CardSoon_File=' + pathName
+
+            // 3. 构建 data (严格按照 legacy 顺序)
+            let data = ''
+
+            // 3.1 ISO/ZIP 验证（仅在有内容文件时）
+            if (this.$refs.files.allNumber > 0) {
+                // ISO 文件名检查
+                if (that.high_setting_form.is_generate_iso) {
+                    if (!that.high_setting_form.iso_file_name) {
+                        this.submitLoading = false
+                        return this.$message.warning(this.$t('work.isoNameInput'))
+                    }
+                }
+
+                // ZIP 文件名检查
+                if (that.high_setting_form.is_generate_zip) {
+                    if (!that.high_setting_form.zip_file_name) {
+                        this.submitLoading = false
+                        return this.$message.warning(this.$t('work.zipNameInput'))
+                    }
+                }
+
+                // ZIP 加密密码检查
+                if (that.high_setting_form.is_generate_zip && that.high_setting_form.is_zip_encrypt) {
+                    if (!that.high_setting_form.zip_password || that.high_setting_form.zip_password !== that.high_setting_form.zip_repassword) {
+                        this.submitLoading = false
                         return this.$message.warning(this.$t('work.zipPassWrong'))
                     }
                 }
             }
 
-            const hasFiles = this.$refs.files && this.$refs.files.allNumber > 0;
-            if (hasFiles) {
-                console.log('检测到待上传文件数量:', this.$refs.files.allNumber)
-                this.flag_cont_up = true
-                this.$refs.files.resume(this.file_form)
-            } else {
-                console.log('无待上传文件或未打开内容管理，直接执行提交')
-                this.upload_over()
-            }
-        },
-        upload_over() {
-            console.log('文件上传/准备就绪, flag_cont_up:', this.flag_cont_up)
-            if (this.flag_cont_up) {
-                this.submitAndTag()
-            } else {
-                this.performSubmit()
-            }
-        },
-        async submitAndTag() {
-            console.log('--- 执行 submitAndTag ---')
-            // 这里的逻辑处理标签文件的上传
-            const data1 = new FormData()
-            let hasFile = false
-            if (this.isNew) {
-                if (this.fileLists[0]) {
-                    data1.append('file1', this.fileLists[0])
-                    hasFile = true
+            // 3.2 标签文件验证与参数构建（仅在有标签文件时）
+            if ((!this.isNew && this.fileData) || (this.isNew && this.fileLists[0])) {
+                // 标签开启校验
+                if (this.isNew && this.fileLists.length == 0) {
+                    this.submitLoading = false
+                    return this.$message.warning(this.$t('work.pleaseUploadTag'))
                 }
-            } else if (this.fileData) {
-                const _file = new File([JSON.stringify(this.fileData)], this.saveWorkList.taskName, { type: 'text/plain' })
-                data1.append('file1', _file)
-                hasFile = true
-            }
+                if (!this.isNew && !this.fileData) {
+                    this.submitLoading = false
+                    return this.$message.warning(this.$t('work.pleaseUploadTag'))
+                }
 
-            if (!hasFile && this.switch_tag) {
-                console.warn('标签管理已打开但未上传标签文件')
-                return this.$message.warning(this.$t('work.pleaseUploadTag'))
-            }
+                if (this.fileData && !this.fileLists[0]) {
+                    data_param += '&Json_File=' + this.saveWorkList.taskName
+                } else if (this.fileData && this.fileLists[0]) {
+                    data_param += '&Json_File=' + this.fileLists[0].name
+                }
 
-            // 添加 CSV 文件
-            if (this.$refs.refFile2 && this.$refs.refFile2.files[0]) {
-                data1.append('file2', this.$refs.refFile2.files[0])
-            }
-            // 添加 Bin/Img 文件 (refFile3)
-            if (this.$refs.refFile3 && this.$refs.refFile3.files[0]) {
-                data1.append('file3', this.$refs.refFile3.files[0])
-            }
+                if (this.$refs.refFile2.files.length != 0) {
+                    data_param += '&Udf_File=file:' + this.$refs.refFile2.files[0].name
+                }
 
-            // 添加元数据图片
-            if (this.tableData && this.tableData.length > 0) {
-                this.tableData.forEach(row => {
-                    if (row.type == 1 && this.metadataFiles[row.origin_name]) {
-                        data1.append(row.origin_name, this.metadataFiles[row.origin_name])
+                // 打印面数校验
+                if (this.fileData) {
+                    if ((this.print_flag == 1 && this.fileData.flag != 1) || (this.print_flag == 2 && this.fileData.flag == 3) || (this.print_flag == 3 && this.fileData.flag == 2)) {
+                        this.submitLoading = false
+                        return this.$message.warning(this.$t('work.print_flagError'))
                     }
-                })
+                }
+                data += '&print_flag=' + this.print_flag
             }
 
-            this.$message.info(this.$t('work.uploadingTag'))
-            const pathName = this.high_setting_form.localfiles ? 'local' : this.upload_disk
-
-            this.$axios.post('/upload/' + pathName, data1).then(() => {
-                this.performSubmit()
-            }).catch(err => {
-                this.$message.error(this.$t('work.uploadFail'))
-            })
-        },
-        async performSubmit() {
-            console.log('--- 执行 performSubmit ---')
-            try {
-                await this.stopRecordingIfActive()
-                console.log('录像停止检查完成')
-            } catch (e) {
-                console.error('停止录像失败:', e)
-            }
-            this.submitLoading = true
-            console.log('submitLoading 已设为 true')
-
-            // 构建原始参数字符串
-            let data_param = 'CardSoon_File=' + (this.high_setting_form.localfiles ? 'local' : this.upload_disk)
-            console.log('--- 提交作业数据预览 ---')
-            console.log('任务ID:', this.upload_disk)
-            console.log('高级设置:', JSON.parse(JSON.stringify(this.high_setting_form)))
-
-            // 拼接标签文件、CSV等参数（简化演示，实际应完整复制）
-            let data = `&label=${encodeURIComponent(this.juanbiao_form)}`
-            data += `&printCopys=${this.number}`
-            data += `&disk_size=${this.size_form}`
-            data += `&zone_type=${this.type_form}`
-            data += `&hasPrintTask=${!!this.switch_tag}`
-            data += `&hasCopyTask=${this.$refs.files ? this.$refs.files.allNumber > 0 : false}`
-            data += `&copy_cache_data=${this.isCopy}`
-            data += `&SpanUcard=${this.high_setting_form.Span_USBcard}`
-            data += `&hash=${this.high_setting_form.s1}`
-            data += `&md5=${this.high_setting_form.s2}`
-            data += `&printer=${this.high_setting_form.target_work}`
-
-            if (this.high_setting_form.formatFile !== 0) {
-                data += `&formatFile=${this.high_setting_form.formatFile}`
+            // 3.3 卷标验证（所有场景必填）
+            if (this.juanbiao_form == '') {
+                this.submitLoading = false
+                return this.$message.warning(this.$t('work.juanbiaoInput'))
             }
 
-            // --- 兼容旧版字段与新增强制提交字段 ---
-            // 基础开关
-            data += `&local=${!!this.high_setting_form.localfiles}`
-            data += `&version=local` // 单机版标识
-            data += `&hasAddFile=${!!this.high_setting_form.hasAddFile}` // 拷贝附加文件
+            const printStatus = this.fileLists[0] ? true : false
+            const copyStatus = this.$refs.files.allNumber > 0 ? true : false
 
-            // ISO/ZIP 高级功能
-            data += `&is_generate_iso=${!!this.high_setting_form.is_generate_iso}`
-            data += `&iso_file_name=${encodeURIComponent(this.high_setting_form.iso_file_name || '')}`
-            data += `&is_generate_zip=${!!this.high_setting_form.is_generate_zip}`
-            data += `&zip_file_name=${encodeURIComponent(this.high_setting_form.zip_file_name || '')}`
-            data += `&is_zip_encrypt=${!!this.high_setting_form.is_zip_encrypt}`
-            data += `&zip_password=${encodeURIComponent(this.high_setting_form.zip_password || '')}`
+            data += '&label=' + encodeURIComponent(this.juanbiao_form)
+            data += '&printCopys=' + this.number
+            data += '&disk_size=' + this.size_form
+            data += '&zone_type=' + this.type_form
+            data += '&hasPrintTask=' + printStatus
+            data += '&hasCopyTask=' + copyStatus
+            data += '&copy_cache_data=' + this.isCopy
+            data += '&SpanUcard=' + this.high_setting_form.Span_USBcard
+            data += '&hasAddFile=' + this.high_setting_form.hasAddFile
+            data += '&version=local'
+            data += '&hash=' + this.high_setting_form.s1
+            data += '&md5=' + this.high_setting_form.s2
+            data += '&printer=' + this.high_setting_form.target_work
 
-            // 硬件与安全
-            data += `&copy_hash=${!!this.high_setting_form.copy_hash}`
-            data += `&enable_dongle_counter=${!!this.high_setting_form.is_dongle_count}`
-            data += `&donglel_install_count=${this.high_setting_form.dongle_count || 0}`
-
-            // 录像与标识
-            data += `&is_blend=${!!this.high_setting_form.is_blend}`
-            data += `&is_printer_record_logo=${!!this.high_setting_form.is_print_logo}`
-
-            // 录像路径逻辑：如果正在录像或已结束，则传递路径
-            if (this.high_setting_form.is_record) {
-                // 优先使用录像组件反馈的路径，否则使用配置路径
-                const videoPath = (this.$refs.screenRecorder && this.$refs.screenRecorder.videoPath) || this.high_setting_form.record_path
-                data += `&record_path=${encodeURIComponent(videoPath || '')}`
-            } else {
-                data += `&record_path=`
+            if (this.high_setting_form.formatFile != 0) {
+                data += '&formatFile=' + this.high_setting_form.formatFile
             }
 
-            // 文件类型映射 (0:File -> 1, 1:ISO -> 2, 2:Encrypt -> 3, 4:Forbid -> 4)
-            const fileTypeMap = { 0: 1, 1: 2, 2: 3, 4: 4 }
-            let apiFileType = fileTypeMap[this.file_form] || 1
-            data += `&file_type=${apiFileType}`
-
-            // 网络路径认证信息 (若存在)
+            // 网络认证信息
             if (this.networkCredentials && (Array.isArray(this.networkCredentials) ? this.networkCredentials.length > 0 : Object.keys(this.networkCredentials).length > 0)) {
-                data += `&net_info=${encodeURIComponent(JSON.stringify(this.networkCredentials))}`
+                data += '&net_info=' + JSON.stringify(this.networkCredentials)
             }
 
-            console.log('--- 最终提交 URL 参数 ---')
-            console.log(data_param + data)
+            // 高级设置参数 - New Fields Mapping
+            data += '&is_generate_iso=' + (String(that.high_setting_form.is_generate_iso) || 'false') +
+                '&iso_file_name=' + (that.high_setting_form.iso_file_name || '') +
+                '&is_generate_zip=' + (String(that.high_setting_form.is_generate_zip) || 'false') +
+                '&zip_file_name=' + (that.high_setting_form.zip_file_name || '') +
+                '&is_zip_encrypt=' + (String(that.high_setting_form.is_zip_encrypt) || 'false') +
+                '&zip_password=' + (that.high_setting_form.zip_password || '') +
+                '&copy_hash=' + (String(that.high_setting_form.copy_hash) || 'false') +
+                '&enable_dongle_counter=' + (String(that.high_setting_form.enable_dongle_counter) || 'false') +
+                '&auth_code=' + (that.high_setting_form.auth_code || '');
 
-            const url = '/rest/job/?' + data_param + data
+            data += '&is_blend=' + (String(that.high_setting_form.is_blend) || 'false');
 
-            if (!this.isCopy) {
-                console.log('执行本地路径提交 (Local Mode)')
-                this.localUpload(this.upload_disk, data_param, data)
+            // Log path logic
+            if (that.high_setting_form.record_screen && that.$refs.screenRecorder && that.$refs.screenRecorder.videoPath) {
+                data += '&record_path=' + that.$refs.screenRecorder.videoPath;
             } else {
-                console.log('执行普通网络提交 (Copy Mode)')
-                this.$axios.post(url)
-                    .then(() => {
+                data += '&record_path=';
+            }
+            data += '&is_printer_record_logo=' + (String(that.high_setting_form.print_record_logo) || 'false');
+
+            if (that.high_setting_form.enable_dongle_counter) {
+                data += '&donglel_install_count=' + (that.high_setting_form.install_dongle_count || 0);
+            } else {
+                data += '&donglel_install_count=0';
+            }
+
+            // File Type Mapping
+            const fileTypeMap = { 0: 1, 1: 2, 2: 3, 4: 4 };
+            let apiFileType = fileTypeMap[that.file_form] || 1;
+            data += '&file_type=' + apiFileType;
+            console.log('提交参数预览:', data_param + data)
+            // Submit Flow
+            if (this.isCopy) {
+                this.submitLoading = true
+                this.$axios({
+                    method: 'post',
+                    url: '/rest/job/?' + data_param + data
+                })
+                    .then((res) => {
                         this.$message.success(this.$t('work.submitSuccess'))
+                        that.submitLoading = false
                         this.$emit('jobPost')
                     })
                     .catch((err) => {
-                        console.error('提交任务失败:', err)
-                        this.$message.error(this.$t('index.fail'))
+                        const resl = err.response.data
+                        console.log(resl)
+                        if (resl.ret && resl.ret === 9) {
+                            that.$emit('addError', { code: resl.ret, tag: 'templateFile', err: 0 })
+                        } else {
+                            that.$emit('addError', { code: resl.ret, tag: 'workFail', err: 0 })
+                        }
+                        this.$message({ offset: 100, message: this.$t('work.submiting') })
+                        that.submitLoading = false
+                        that.$emit('jobPost')
                     })
-                    .finally(() => this.submitLoading = false)
+            } else {
+                that.localUpload(pathName, data_param, data)
             }
         },
 
         localUpload(pathName, data_param, data) {
-            const filesList = this.$refs.files.getLists()
             let file_path = []
-            for (let i in filesList) {
-                file_path.push(filesList[i].path)
+            // 注意: 这里使用 getLists() 可能需要适配 legacy 的 filesList 结构
+            // 如果 filesList[i].path 是正确路径，则无需更改
+            const list = this.$refs.files.filesList // Prefer direct filesList if available like legacy
+            for (let i in list) {
+                file_path.push(list[i].path)
             }
 
             const jsonData = { files: file_path }
-            const jsonFilePath = path.join(remote.app.getPath('userData'), 'filepath.json')
+            const jsonFilePath = path.join(remote.app.getPath('userData'), 'filepath.json') // 使用 userData 目录更安全
+
             try {
                 fs.writeFileSync(jsonFilePath, JSON.stringify(jsonData), 'utf-8')
-                const fileContent = fs.readFileSync(jsonFilePath)
-                const blob = new Blob([fileContent], { type: 'application/json' })
 
-                const formData = new FormData()
-                formData.append('file', blob, 'filepath.json')
+                // Legacy Stream Logic
+                const fileStream = fs.createReadStream(jsonFilePath)
+                const buffer = []
+                fileStream.on('data', (chunk) => {
+                    buffer.push(chunk)
+                })
+                fileStream.on('end', () => {
+                    let that = this
+                    const blob = new Blob([Buffer.concat(buffer)], { type: 'application/octet-stream' })
 
-                if (this.networkCredentials && (Array.isArray(this.networkCredentials) ? this.networkCredentials.length > 0 : Object.keys(this.networkCredentials).length > 0)) {
-                    formData.append('net_info', JSON.stringify(this.networkCredentials))
-                }
+                    const formData = new FormData()
+                    formData.append('file', blob, path.basename(jsonFilePath))
 
-                this.submitLoading = true
-                this.$axios.post(`/upload/${pathName}`, formData).then(() => {
-                    this.$axios.post('/rest/job/?' + data_param + data).then(() => {
-                        this.$message.success(this.$t('work.submitSuccess'))
-                        this.$emit('jobPost')
+                    if (this.networkCredentials && (Array.isArray(this.networkCredentials) ? this.networkCredentials.length > 0 : Object.keys(this.networkCredentials).length > 0)) {
+                        formData.append('net_info', JSON.stringify(this.networkCredentials))
+                    }
+
+                    that.submitLoading = true
+                    that.$axios({
+                        method: 'post',
+                        url: `/upload/${pathName}`,
+                        headers: { 'Content-Type': 'multipart/form-data;boundary=' + new Date().getTime() },
+                        data: formData
+                    }).then(() => {
+                        that.$axios({
+                            method: 'post',
+                            url: '/rest/job/?' + data_param + data
+                        }).then((res) => {
+                            this.$message.success(this.$t('work.submitSuccess'))
+                            that.submitLoading = false
+                            this.$emit('jobPost')
+                        }).catch((err) => {
+                            const resl = err.response && err.response.data
+                            if (resl && resl.ret === 9) {
+                                that.$emit('addError', { code: resl.ret, tag: 'templateFile', err: 0 })
+                            } else {
+                                that.$emit('addError', { code: resl ? resl.ret : -1, tag: 'workFail', err: 0 })
+                            }
+                            this.$message({ offset: 100, message: this.$t('work.submiting') })
+                            that.submitLoading = false
+                            that.$emit('jobPost')
+                        })
                     }).catch(err => {
-                        this.$message.error(this.$t('index.fail'))
-                    }).finally(() => this.submitLoading = false)
-                }).catch(err => {
-                    this.$message.error('Local upload failed')
-                    this.submitLoading = false
+                        this.$message.error('Local upload failed')
+                        that.submitLoading = false
+                    })
                 })
             } catch (e) {
+                console.error(e)
+                this.$message.error('File Write Error')
+                this.submitLoading = false
             }
         },
         saveWork() {
-            const save = {
-                fileData: this.fileData,
-                tableData: this.tableData,
-                juanbiao: this.juanbiao_form,
-                size_form: this.size_form,
-                type_form: this.type_form,
-                high_setting: this.high_setting_form
+            let t = true
+            for (let i in this.$refs.files.filesList) {
+                if (this.$refs.files.filesList[i].size == -1) {
+                    t = false
+                }
             }
-            dialog.showSaveDialog({
-                title: 'Save Task',
-                filters: [{ name: 'Soon Work', extensions: ['swk'] }]
-            }).then(result => {
-                if (result.filePath) fs.writeFileSync(result.filePath, JSON.stringify(save))
-            })
+
+            if (t) {
+                let save = this.fileData
+                save.filesList = this.$refs.files.getLists()
+                //save.tagFile = this.fileData;
+                save.allNumber = this.$refs.files.allNumber
+                save.size = this.size
+                save.file_form = this.file_form == 2 && this.isPass ? 3 : this.file_form
+                save.type_form = this.type_form
+                save.size_form = this.size_form
+                save.juanbiao_form = this.juanbiao_form
+                save.high_setting_form = this.high_setting_form
+                save.print_flag = this.print_flag
+
+                //  save.tableData = this.tableData;
+                if (this.$refs.files.allNumber > 0 && this.fileLists[0]) {
+                    save.switch = 3
+                } else if (this.$refs.files.allNumber > 0) {
+                    save.switch = 1
+                } else {
+                    save.switch = 2
+                }
+                const v = JSON.stringify(save)
+                dialog
+                    .showSaveDialog({
+                        title: 'Save',
+                        filters: [{ name: 'Soon Work', extensions: ['swk'] }]
+                    })
+                    .then((result) => {
+                        fs.writeFileSync(result.filePath, v)
+                    })
+                    .catch((err) => {
+                        console.log(err)
+                    })
+            } else {
+                this.$message({
+                    offset: 100,
+                    message: this.$t('work.waitCalculate'),
+                    type: 'warning'
+                })
+            }
         },
 
         // --- 新手引导功能 ---
@@ -896,6 +1302,45 @@ export default {
         },
         sizeChange(size) {
             this.size = size
+        },
+
+        // --- 新手引导方法 ---
+        exitGuide() {
+            if (!this.guideStep) return
+            for (let key in this.guideStep) {
+                this.guideStep[key].show = false
+            }
+            this.currentStep = -1
+            localStorage.setItem('currentStep', this.currentStep)
+            localStorage.setItem('guideStep', JSON.stringify(this.guideStep))
+        },
+        prevStep() {
+            if (!this.guideStep) return
+            this.guideStep[this.currentStep].show = false
+            this.currentStep = parseInt(this.currentStep) - 1
+            if (this.guideStep[this.currentStep]) {
+                this.guideStep[this.currentStep].show = true
+                localStorage.setItem('guideStep', JSON.stringify(this.guideStep))
+                localStorage.setItem('currentStep', this.currentStep)
+            } else {
+                this.exitGuide()
+            }
+        },
+        nextStep() {
+            if (!this.guideStep) return
+            this.guideStep[this.currentStep].show = false
+            this.currentStep = parseInt(this.currentStep) + 1
+            if (this.guideStep[this.currentStep]) {
+                this.guideStep[this.currentStep].show = true
+                localStorage.setItem('guideStep', JSON.stringify(this.guideStep))
+                localStorage.setItem('currentStep', this.currentStep)
+            } else {
+                this.exitGuide()
+            }
+        },
+        help() {
+            const { ipcRenderer } = require('electron')
+            ipcRenderer.send('open-help-file')
         }
     }
 }

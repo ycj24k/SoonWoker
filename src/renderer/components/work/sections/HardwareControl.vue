@@ -1,7 +1,7 @@
 <template>
     <div class="grand-section">
         <div class="grand-title">
-            <span>{{ $t('work.hardwareControl') || '硬件管控' }}</span>
+            <span>{{ $t('work.hardwareControl') }}</span>
             <div class="title-line"></div>
         </div>
         <el-row :gutter="20">
@@ -9,12 +9,12 @@
                 <div class="hardware-box">
                     <div class="mb-10">
                         <el-checkbox v-model="form.is_dongle_count">
-                            {{ $t('work.installDongle') || '加密狗计数' }}
+                            {{ $t('work.installDongle') }}
                         </el-checkbox>
                     </div>
                     <transition name="el-zoom-in-top">
                         <div v-if="form.is_dongle_count" class="ml-20">
-                            <el-form-item :label="$t('work.installCount') || '安装次数'" label-width="80px">
+                            <el-form-item :label="$t('work.installCount')" label-width="80px">
                                 <el-input-number size="small" v-model="form.dongle_count" :min="1" :max="999" />
                             </el-form-item>
                         </div>

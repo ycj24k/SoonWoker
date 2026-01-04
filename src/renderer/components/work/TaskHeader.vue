@@ -1,25 +1,32 @@
 <template>
     <div class="task-header-container">
         <div class="task-header-flex">
-            <!-- 容量选择 -->
-            <div class="header-item">
-                <label class="inline-label">{{ $t('work.size') }}</label>
-                <el-select v-model="sizeFormLocal" class="header-select size-select" size="small"
-                    @change="$emit('update:size_form', $event)" :placeholder="$t('work.pleaseSelect')">
-                    <el-option v-for="item in sizeTypeOptions" :key="item.value" :label="item.label"
-                        :value="item.value" />
-                </el-select>
-            </div>
+            <!-- 容量选择 - 步骤8 -->
+            <guide-popover :step="8" :guide-step="guideStep" :current-step="currentStep"
+                @exit-guide="$emit('exit-guide')" @prev-step="$emit('prev-step')" @next-step="$emit('next-step')">
+                <div class="header-item">
+                    <label class="inline-label">{{ $t('work.size') }}</label>
+                    <el-select v-model="sizeFormLocal" class="header-select size-select" size="small"
+                        @change="$emit('update:size_form', $event)" :placeholder="$t('work.pleaseSelect')">
+                        <el-option v-for="item in sizeTypeOptions" :key="item.value" :label="item.label"
+                            :value="item.value"
+                            :disabled="filterPassedType && filterPassedType.length > 0 && filterPassedType.indexOf(item.value) == -1" />
+                    </el-select>
+                </div>
+            </guide-popover>
 
-            <!-- 拷贝类型 (work.content 在 screenshot 中显示为 "拷贝类型" 附近位置 ) -->
-            <div class="header-item">
-                <label class="inline-label">{{ $t('work.content') }}</label>
-                <el-select v-model="fileFormLocal" class="header-select" size="small"
-                    @change="$emit('update:file_form', $event)">
-                    <el-option v-for="item in fileTypeOptions" :key="item.value" :label="item.label"
-                        :value="item.value" />
-                </el-select>
-            </div>
+            <!-- 拷贝类型 - 步骤9 -->
+            <guide-popover :step="9" :guide-step="guideStep" :current-step="currentStep"
+                @exit-guide="$emit('exit-guide')" @prev-step="$emit('prev-step')" @next-step="$emit('next-step')">
+                <div class="header-item">
+                    <label class="inline-label">{{ $t('work.content') }}</label>
+                    <el-select v-model="fileFormLocal" class="header-select" size="small"
+                        @change="$emit('update:file_form', $event)">
+                        <el-option v-for="item in fileTypeOptions" :key="item.value" :label="item.label"
+                            :value="item.value" />
+                    </el-select>
+                </div>
+            </guide-popover>
 
             <!-- 分区模式 (如果需要显示) -->
             <div class="header-item" v-if="false">
@@ -41,14 +48,22 @@
 </template>
 
 <script>
+import GuidePopover from './GuidePopover.vue'
+
 export default {
     name: 'TaskHeader',
+    components: {
+        GuidePopover
+    },
     props: {
         juanbiao_form: String,
         file_form: Number,
         size_form: [Number, String],
         type_form: Number,
-        sizeType: Array
+        sizeType: Array,
+        filterPassedType: Array,
+        guideStep: [Object, Array],
+        currentStep: [Number, String]
     },
     data() {
         return {
@@ -89,10 +104,10 @@ export default {
         },
         partitionOptions() {
             return [
-                { value: 0, label: this.$t("work.diskPart") || '普通分区' },
-                { value: 1, label: this.$t("work.cdPart") || '光盘分区' },
-                { value: 3, label: this.$t("work.forbidCopyPart") || '防拷贝分区' },
-                { value: 5, label: this.$t("work.cdWithDisk") || '光盘+普通' }
+                { value: 0, label: this.$t("work.diskPart") },
+                { value: 1, label: this.$t("work.cdPart") },
+                { value: 3, label: this.$t("work.forbidCopyPart") },
+                { value: 5, label: this.$t("work.cdWithDisk") }
             ]
         }
     }

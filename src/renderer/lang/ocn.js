@@ -3,7 +3,8 @@ export default {
     confirm: "確認",
     cancel: "取消",
     save: "保存",
-    ok: "確定"
+    ok: "確定",
+    authSaveFail: "保存認證資訊失敗"
   },
   finger: {
     intTips: "指紋模塊正在初始化",
@@ -426,6 +427,8 @@ export default {
     enableScreenRecord: "啟用屏幕錄制",
     printRecordLogo: "打印標識",
     recordPath: "錄制路徑",
+    recording: "錄製中...",
+    recordingCanceled: "錄製已取消",
     // Hardware
     hardwareControl: "硬體管控",
     installDongle: "加密狗計數",
@@ -484,6 +487,10 @@ export default {
     oneFolder: "特定作業只能添加一個文件夾",
     notFolder: "添加內容不是文件夾",
     print_flagError: "打印面數不匹配,請重新選擇!",
+    cannotFindBin: "模板中沒有合併字段，無法使用CSV文件",
+    pleaseSelectCap: "請選擇容量",
+    dongleCountRequired: "請輸入有效的加密狗安裝次數（必須是正整數）",
+    authCode: "授權碼",
     pleaseUploadTag: "請添加標籤文件",
     uploadingTag: "正在上傳標籤文件...",
     pleaseUploadingImgBin: "請添加圖片文件",

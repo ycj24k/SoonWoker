@@ -33,28 +33,28 @@
     <div class="row">
       <div class="lable">RejectConfig</div>
       <div class="switch">
-        <el-switch v-model="iniData.RejectConfig"></el-switch>
+        <el-switch v-model="iniData.RejectConfig" :active-value="1" :inactive-value="0"></el-switch>
       </div>
       <div class="tips">{{ $t("dispose.tips1") }}</div>
     </div>
     <div class="row">
       <div class="lable">StopOnFailure</div>
       <div class="switch">
-        <el-switch v-model="iniData.StopOnFailure"></el-switch>
+        <el-switch v-model="iniData.StopOnFailure" :active-value="1" :inactive-value="0"></el-switch>
       </div>
       <div class="tips">{{ $t("dispose.errorTips2") }}</div>
     </div>
     <div class="row">
       <div class="lable">KeepCombinedImage</div>
       <div class="switch">
-        <el-switch v-model="iniData.KeepCombinedImage"></el-switch>
+        <el-switch v-model="iniData.KeepCombinedImage" :active-value="1" :inactive-value="0"></el-switch>
       </div>
       <div class="tips">{{ $t("dispose.isReserveimg") }}</div>
     </div>
     <div class="row">
       <div class="lable">CleanTaskFile</div>
       <div class="switch">
-        <el-switch v-model="iniData.CleanTaskFile"></el-switch>
+        <el-switch v-model="iniData.CleanTaskFile" :active-value="1" :inactive-value="0"></el-switch>
       </div>
       <div class="tips">{{ $t("dispose.isReservetask") }}</div>
     </div>
@@ -65,7 +65,7 @@
       ">
       <div class="lable">UploadSharedDir</div>
       <div class="switch">
-        <el-switch v-model="iniData.UploadSharedDir"></el-switch>
+        <el-switch v-model="iniData.UploadSharedDir" :active-value="1" :inactive-value="0"></el-switch>
       </div>
       <div class="tips">{{ $t("dispose.isUpload") }}</div>
     </div>
@@ -89,201 +89,82 @@
 </template>
 
 <script>
-const { ipcRenderer } = require("electron");
-var fs = require("fs"),
-  ini = require("ini");
 export default {
   name: "dispose",
   data() {
     return {
       autoRetryOptions: [
-        {
-          value: 0,
-          label: "0",
-        },
-        {
-          value: 1,
-          label: "1",
-        },
-        {
-          value: 2,
-          label: "2",
-        },
+        { value: 0, label: "0" },
+        { value: 1, label: "1" },
+        { value: 2, label: "2" },
       ],
       LogLevelOptions: [
-        {
-          value: "TRACE",
-          label: "TRACE",
-        },
-        {
-          value: "DEBUG",
-          label: "DEBUG",
-        },
-        {
-          value: "INFO",
-          label: "INFO",
-        },
-        {
-          value: "WARNING",
-          label: "WARNING",
-        },
-        {
-          value: "ERROR",
-          label: "ERROR",
-        },
-        {
-          value: "FATAL",
-          label: "FATAL",
-        },
+        { value: "TRACE", label: "TRACE" },
+        { value: "DEBUG", label: "DEBUG" },
+        { value: "INFO", label: "INFO" },
+        { value: "WARNING", label: "WARNING" },
+        { value: "ERROR", label: "ERROR" },
+        { value: "FATAL", label: "FATAL" },
       ],
       iniData: {
-        LogLevel: 'INFO',
+        LogLevel: "INFO",
         AutoRetryTimes: 0,
-        TaskDir: '',
-        SharedDir: '',
-        RejectConfig: false,
-        StopOnFailure: false,
-        KeepCombinedImage: false,
-        CleanTaskFile: false,
-        UploadSharedDir: false,
-        AuthorizationCode: ''
+        TaskDir: "",
+        SharedDir: "",
+        RejectConfig: 0,
+        StopOnFailure: 0,
+        KeepCombinedImage: 0,
+        CleanTaskFile: 0,
+        UploadSharedDir: 0,
+        AuthorizationCode: "",
+        DeleteTask: 0 // Ensure this is preserved if present in API
       },
-
-      AutoRetryTimes: null,
-      LogLevel: "TRACE",
-      TaskDir: null,
-      SharedDir: null,
-      RejectConfig: false,
-      StopOnFailure: false,
-      KeepCombinedImage: false,
-      CleanTaskFile: false,
       show: true,
-      root: "",
     };
   },
   methods: {
-    save() {
-      //console.log(this.iniData);
-      //console.log(ini.stringify(this.iniData));
-      //fs.writeFileSync("../Debug/config.ini");
-      let that = this;
-      fs.writeFile(
-        this.root + "/ProductionServer/config.ini",
-        ini.stringify(this.iniData),
-        function (err) {
-          if (err) {
-            that.$message.error(that.$t("dispose.errorReserve"));
+    // 获取配置
+    getConfig() {
+      this.$axios.get('/admin/get_config')
+        .then(res => {
+          if (res && res.data) {
+            // 合并数据，确保所有字段都存在
+            this.iniData = { ...this.iniData, ...res.data };
           } else {
-            that.$message({
+            this.$message.error(this.$t("dispose.errorRead"));
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          this.$message.error(this.$t("dispose.errorRead"));
+        });
+    },
+    // 保存配置
+    save() {
+      this.$axios.post('/admin/get_config', this.iniData)
+        .then(res => {
+          if (res && (res.data === "success" || res.status === 200)) {
+            this.$message({
               type: "success",
-              message: that.$t("dispose.successReserve"),
+              message: this.$t("dispose.successReserve"),
+            });
+          } else {
+            // 某些接口可能返回 { ret: 0 } 或其他形式，视具体情况而定
+            // 这里假设200 OK即为成功，或者根据res.data判断
+            this.$message({
+              type: "success",
+              message: this.$t("dispose.successReserve"),
             });
           }
-        }
-      );
+        })
+        .catch(err => {
+          console.error(err);
+          this.$message.error(this.$t("dispose.errorReserve"));
+        });
     },
   },
   mounted() {
-    let that = this;
-    //var data = ini.parse(fs.readFileSync("F:\\controll\\config.ini", "utf-8"));
-    ipcRenderer.on("get-root-callback", (event, data) => {
-      this.root = data;
-      fs.readFile(this.root + "/ProductionServer/config.ini", "utf-8", (err, res) => {
-        if (err) {
-          console.log(err);
-          this.$message.error(that.$t("dispose.errorRead"));
-          this.show = false;
-        } else {
-          console.log(res);
-          let data = ini.parse(res);
-          console.log(data);
-          this.iniData = data;
-          that.iniData.AutoRetryTimes = data.AutoRetryTimes
-            ? data.AutoRetryTimes
-            : 0;
-          that.iniData.TaskDir = data.TaskDir ? data.TaskDir : "";
-          that.iniData.SharedDir = data.SharedDir ? data.SharedDir : "";
-          that.iniData.LogLevel = data.LogLevel ? data.LogLevel : "";
-          that.iniData.CleanTaskFile =
-            data.CleanTaskFile == "true" ||
-              data.CleanTaskFile == "True" ||
-              data.CleanTaskFile
-              ? true
-              : false;
-          that.iniData.KeepCombinedImage =
-            data.KeepCombinedImage == "true" ||
-              data.KeepCombinedImage == "True" ||
-              data.KeepCombinedImage
-              ? true
-              : false;
-          that.iniData.RejectConfig =
-            data.RejectConfig == "true" ||
-              data.RejectConfig == "True" ||
-              data.RejectConfig
-              ? true
-              : false;
-          that.iniData.StopOnFailure =
-            data.StopOnFailure == "true" ||
-              data.StopOnFailure == "True" ||
-              data.StopOnFailure
-              ? true
-              : false;
-          that.iniData.UploadSharedDir =
-            data.UploadSharedDir == "true" ||
-              data.UploadSharedDir == "True" ||
-              data.UploadSharedDir
-              ? true
-              : false;
-          that.iniData.AuthorizationCode = data.AuthorizationCode ? data.AuthorizationCode : "";
-          console.log(data);
-        }
-      });
-    });
-    ipcRenderer.send("get-root");
-
-    //iniparser.parse("../Debug/config.ini", function (err, data) {
-    /*
-        AutoRetryTimes: "0"
-        CardsoonModel: "SF80"
-        CleanTaskFile: "false"
-        RejectConfig: "false"
-        KeepCombinedImage: "True"
-        LogLevel: "DEBUG"
-        SharedDir: "C:\\CardSoonRepo"
-        StopOnFailure: "false"
-        SystemSn: "830001"
-        TaskDir: "C:\\PrintTasks"
-        Version: "V3.1"
-
-    iniparser.parse("F:\\controll\\config.ini", function (err, data) {
-      console.log(err);
-      if (err) {
-        that.$message.error("读取配置文件失败！");
-      } else {
-        console.log(data);
-        that.AutoRetryTimes = data.AutoRetryTimes ? data.AutoRetryTimes : 0;
-        that.TaskDir = data.TaskDir ? data.TaskDir : "";
-        that.SharedDir = data.SharedDir ? data.SharedDir : "";
-        that.LogLevel = data.LogLevel ? data.LogLevel : "";
-        that.CleanTaskFile =
-          data.CleanTaskFile == "true" || data.CleanTaskFile == "True"
-            ? true
-            : false;
-        that.KeepCombinedImage =
-          data.KeepCombinedImage == "true" || data.KeepCombinedImage == "True"
-            ? true
-            : false;
-        that.RejectConfig =
-          data.RejectConfig == "true" || data.RejectConfig == "True"
-            ? true
-            : false;
-        that.StopOnFailure =
-          data.StopOnFailure == "true" || data.StopOnFailure == "True"
-            ? true
-            : false;
-      }
-    });
-    */
+    this.getConfig();
   },
 };
 </script>

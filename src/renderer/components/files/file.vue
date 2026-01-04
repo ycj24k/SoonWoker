@@ -349,7 +349,11 @@ export default {
           entries.forEach((f) => this.fileBack(f, false));
         }
       } else if (file_form == 1) {
-        //电子光盘
+        // 电子光盘：不需要拷贝，直接标记为完成
+        this.overNumber = 0;
+        for (const file of entries) {
+          this.fileBack(file, true);
+        }
       } else if (file_form == 2) {
         //zip
         this.archiverIsover = false;
@@ -364,7 +368,11 @@ export default {
         let password = "123456";
         zip(this.filesList, this.zip_path, this.archiverBack, true, password);
       } else if (file_form == 4) {
-        //u盘
+        // 禁拷贝U盘：不需要拷贝，直接标记为完成
+        this.overNumber = 0;
+        for (const file of entries) {
+          this.fileBack(file, true);
+        }
       } else {
         // 默认路径上传：不实际拷贝，仅回调推进流程
         this.overNumber = 0;

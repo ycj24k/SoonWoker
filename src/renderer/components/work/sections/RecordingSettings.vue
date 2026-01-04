@@ -1,7 +1,7 @@
 <template>
     <div class="grand-section">
         <div class="grand-title">
-            <span>{{ $t('work.screenRecordReview') || '屏幕记录审查' }}</span>
+            <span>{{ $t('work.screenRecordReview') }}</span>
             <div class="title-line"></div>
         </div>
         <div class="feature-row mb-10">

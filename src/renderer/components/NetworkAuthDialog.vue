@@ -1,50 +1,28 @@
 <template>
-  <el-dialog
-    :title="$t('networkAuth.title')"
-    :visible.sync="visible"
-    width="600px"
-    :close-on-click-modal="false"
-    :close-on-press-escape="false"
-    :show-close="false"
-    :append-to-body="true"
-    :z-index="9999"
-  >
+  <el-dialog :title="$t('networkAuth.title')" :visible.sync="visible" width="600px" :close-on-click-modal="false"
+    :close-on-press-escape="false" :show-close="false" :append-to-body="true" :z-index="9999">
     <div class="network-auth-content">
       <p class="auth-description">
         {{ $t('networkAuth.description') }}
       </p>
-      
+
       <div class="network-paths">
-        <div 
-          v-for="(path, index) in networkPaths" 
-          :key="index"
-          class="network-path-item"
-        >
+        <div v-for="(path, index) in networkPaths" :key="index" class="network-path-item">
           <div class="path-info">
             <span class="path-label">{{ $t('networkAuth.pathLabel') }}</span>
             <span class="path-value">{{ path.path }}</span>
           </div>
-          
+
           <div class="auth-fields">
-            <el-input
-              v-model="path.userName"
-              :placeholder="$t('networkAuth.userName')"
-              size="small"
-              style="width: 150px; margin-right: 10px;"
-            />
-            <el-input
-              v-model="path.password"
-              type="password"
-              :placeholder="$t('networkAuth.password')"
-              size="small"
-              style="width: 150px;"
-              show-password
-            />
+            <el-input v-model="path.userName" :placeholder="$t('networkAuth.userName')" size="small"
+              style="width: 150px; margin-right: 10px;" />
+            <el-input v-model="path.password" type="password" :placeholder="$t('networkAuth.password')" size="small"
+              style="width: 150px;" show-password />
           </div>
         </div>
       </div>
     </div>
-    
+
     <div slot="footer" class="dialog-footer">
       <el-button @click="handleCancel">{{ $t('networkAuth.cancel') }}</el-button>
       <el-button type="primary" @click="handleConfirm" :loading="loading">
@@ -76,7 +54,7 @@ export default {
     handleCancel() {
       this.$emit('cancel')
     },
-    
+
     async handleConfirm() {
       // 验证所有路径都填写了用户名和密码
       for (let path of this.networkPaths) {
@@ -85,29 +63,29 @@ export default {
           return
         }
       }
-      
+
       this.loading = true
-      
+
       try {
         // 保存到本地存储
         this.saveNetworkCredentials()
-        
+
         // 构建 net_info 数据
         const netInfo = this.networkPaths.map(path => ({
           host_name: this.extractHostName(path.path),
           user_name: path.userName,
           password: path.password
         }))
-        
+
         this.$emit('confirm', netInfo)
       } catch (error) {
         console.error('保存网络认证信息失败:', error)
-        this.$message.error('保存认证信息失败')
+        this.$message.error(this.$t('networkAuth.authSaveFail'))
       } finally {
         this.loading = false
       }
     },
-    
+
     extractHostName(path) {
       // 从网络路径中提取主机名
       // 支持格式：\\hostname\path, //hostname/path, \\192.168.1.1\path
@@ -126,7 +104,7 @@ export default {
       }
       return 'unknown'
     },
-    
+
     saveNetworkCredentials() {
       // 保存到 localStorage
       const credentials = {}
@@ -138,9 +116,9 @@ export default {
           lastUsed: new Date().toISOString()
         }
       })
-      
+
       localStorage.setItem('networkCredentials', JSON.stringify(credentials))
-      
+
       // 同时保存到 Vuex store（若可用）
       if (this.$store && this.$store.commit) {
         this.$store.commit('SET_NETWORK_CREDENTIALS', credentials)
@@ -157,7 +135,7 @@ export default {
     color: #606266;
     font-size: 14px;
   }
-  
+
   .network-paths {
     .network-path-item {
       border: 1px solid #e4e7ed;
@@ -165,16 +143,16 @@ export default {
       padding: 15px;
       margin-bottom: 15px;
       background-color: #fafafa;
-      
+
       .path-info {
         margin-bottom: 10px;
-        
+
         .path-label {
           font-weight: bold;
           color: #303133;
           margin-right: 10px;
         }
-        
+
         .path-value {
           color: #409eff;
           font-family: monospace;
@@ -183,7 +161,7 @@ export default {
           border-radius: 3px;
         }
       }
-      
+
       .auth-fields {
         display: flex;
         align-items: center;

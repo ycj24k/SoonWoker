@@ -1,7 +1,7 @@
 <template>
     <div class="grand-section">
         <div class="grand-title">
-            <span>{{ $t('work.advancedFeatures') || '高级功能' }}</span>
+            <span>{{ $t('work.advancedFeatures') }}</span>
             <div class="title-line"></div>
         </div>
 
@@ -102,8 +102,11 @@
         <!-- 计数器详细 -->
         <div v-if="form.is_dongle_count" class="mt-10 p-10"
             style="background: #fdf6ec; border-radius: 6px; border: 1px solid #faecd8;">
-            <el-form-item :label="$t('work.installCount')" label-width="140px" class="mb-0">
+            <el-form-item :label="$t('work.installCount')" label-width="140px" class="mb-5">
                 <el-input-number v-model="form.dongle_count" :min="1" :step="1" :precision="0" size="mini" />
+            </el-form-item>
+            <el-form-item :label="$t('work.authCode')" label-width="140px" class="mb-0">
+                <el-input v-model="form.auth_code" size="mini" :placeholder="$t('work.inputAuthCode')" />
             </el-form-item>
         </div>
     </div>

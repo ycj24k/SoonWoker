@@ -25,7 +25,8 @@ export default {
     cancel: "取消",
     authRequired: "请填写所有网络路径的用户名和密码",
     authSuccess: "网络认证信息已保存",
-    authCanceled: "已取消网络路径认证"
+    authCanceled: "已取消网络路径认证",
+    authSaveFail: "保存认证信息失败"
   },
   finger: {
     intTips: "指纹模块正在初始化",
@@ -525,12 +526,13 @@ export default {
     defaultPath: "项目根目录/videos",
     recordingStatus: "录制状态",
     recording: "录制中...",
+    recordingCanceled: "录制已取消",
     notRecording: "未录制",
     // 硬件管控
     hardwareControl: "硬件管控",
     installDongle: "加密狗计数",
     installCount: "安装次数",
-    setAuthCode: "设置授权码",
+    authCode: "授权码",
     inputAuthCode: "输入授权码",
     addContent: "添加内容",
     addTag: "添加标签",
@@ -569,6 +571,9 @@ export default {
     oneFolder: "特定作业只能添加一个文件夹",
     notFolder: "添加内容不是文件夹",
     print_flagError: "打印面数不匹配，请重新选择!",
+    cannotFindBin: "模板中没有合并字段，无法使用CSV文件",
+    pleaseSelectCap: "请选择容量",
+    dongleCountRequired: "请输入有效的加密狗安装次数（必须是正整数）",
     pleaseUploadTag: "请添加标签文件",
     uploadingTag: "正在上传标签文件...",
     pleaseUploadingImgBin: "请添加图片文件",

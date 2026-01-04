@@ -12,7 +12,7 @@
     <!-- 录制状态指示器 -->
     <div v-if="isRecording" class="recording-indicator" :class="{ 'status-only': statusOnly }">
       <span class="recording-dot"></span>
-      <span class="recording-text">{{ statusOnly ? '录制中...' : recordingTime }}</span>
+      <span class="recording-text">{{ statusOnly ? $t('recorder.recording') : recordingTime }}</span>
     </div>
   </div>
 </template>
@@ -113,12 +113,12 @@ export default {
         this.currentTaskId = this.taskId || '';
         this.startTimer();
 
-        this.$message.success(this.$t('recorder.recordingStarted') || '开始录制');
+        this.$message.success(this.$t('recorder.recordingStarted'));
         this.$emit('recording-started');
 
       } catch (error) {
         console.error('启动录制失败:', error);
-        this.$message.error(this.$t('recorder.startFailed') || '启动录制失败');
+        this.$message.error(this.$t('recorder.startFailed'));
       } finally {
         this.loading = false;
       }
@@ -145,7 +145,7 @@ export default {
 
       } catch (error) {
         console.error('停止录制失败:', error);
-        this.$message.error(this.$t('recorder.stopFailed') || '停止录制失败');
+        this.$message.error(this.$t('recorder.stopFailed'));
       } finally {
         this.loading = false;
       }
@@ -153,7 +153,7 @@ export default {
 
     async cancelRecording() {
       await this.stopRecording(false);
-      this.$message.info('录制已取消');
+      this.$message.info(this.$t('recorder.recordingCanceled'));
     },
 
     async saveRecording(customPath) {
@@ -176,7 +176,7 @@ export default {
           const result = await ipcRenderer.invoke('stop-recording', base64data, this.currentTaskId, customPath);
 
           if (result.success) {
-            this.$message.success(this.$t('recorder.savedSuccess') || `录制已保存: ${result.fileName}`);
+            this.$message.success(this.$t('recorder.savedSuccess') + `: ${result.fileName}`);
             this.$emit('recording-saved', result);
           } else {
             this.$message.error(result.message);
@@ -186,7 +186,7 @@ export default {
 
       } catch (error) {
         console.error('保存录制失败:', error);
-        this.$message.error(this.$t('recorder.saveFailed') || '保存录制失败');
+        this.$message.error(this.$t('recorder.saveFailed'));
       }
     },
 

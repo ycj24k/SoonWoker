@@ -6,8 +6,10 @@ export default {
     ok: "OK"
   },
   recorder: {
-    startRecording: "Start Recording",
-    stopRecording: "Stop Recording",
+    recordingStatus: "Recording Status",
+    recording: "Recording...",
+    recordingCanceled: "Recording canceled",
+    notRecording: "Not recording",
     recordingStarted: "Screen recording started",
     recordingStopped: "Recording stopped",
     savedSuccess: "Recording saved",
@@ -23,9 +25,10 @@ export default {
     password: "Password",
     confirm: "Confirm",
     cancel: "Cancel",
-    authRequired: "Please fill in username and password for all network paths",
-    authSuccess: "Network authentication information saved",
-    authCanceled: "Network path authentication canceled"
+    authRequired: "Please enter username and password for all network paths",
+    authSuccess: "Network credentials saved",
+    authCanceled: "Network authentication canceled",
+    authSaveFail: "Failed to save authentication info"
   },
   finger: {
     intTips: "The fingerprint module is initializing",
@@ -452,6 +455,7 @@ export default {
     hardwareControl: "Hardware Control",
     installDongle: "Dongle Count",
     installCount: "Install Count",
+    authCode: "Auth Code",
     setAuthCode: "Auth Code",
     inputAuthCode: "Enter Auth Code",
     // Metadata
@@ -502,6 +506,9 @@ export default {
     oneFolder: "Only one folder can be added for Special jobs",
     notFolder: "Need to add folder",
     print_flagError: "print type does not match",
+    cannotFindBin: "Template has no merge fields, cannot use CSV file",
+    pleaseSelectCap: "Please select capacity",
+    dongleCountRequired: "Please enter a valid dongle count (must be a positive integer)",
     pleaseUploadTag: "Please add a Lable file",
     uploadingTag: "Uploading label file",
     pleaseUploadingImgBin: "Please add a pic file",

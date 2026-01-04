@@ -12,10 +12,10 @@
                         :value="item.value" />
                 </el-select>
                 <el-button size="small" @click="$emit('open-design')">
-                    {{ $t('work.design') || '创建标签' }}
+                    {{ $t('work.design') }}
                 </el-button>
                 <el-button size="small" @click="$emit('open-file')">
-                    {{ $t('work.import') || '选择标签' }}
+                    {{ $t('work.import') }}
                 </el-button>
             </div>
         </div>
@@ -44,7 +44,7 @@
         <div class="metadata-container mt-10">
             <div class="sub-title">
                 <i class="el-icon-edit-outline"></i>
-                <span>{{ $t('work.metadataEdit') || '标签内容编辑' }}</span>
+                <span>{{ $t('work.metadataEdit') }}</span>
             </div>
             <el-table v-if="tableData && tableData.length > 0" :data="tableData" class="metadata-table flex-grow-table"
                 :empty-text="$t('work.nodata')" :show-header="false">

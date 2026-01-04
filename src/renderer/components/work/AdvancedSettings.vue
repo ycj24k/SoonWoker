@@ -1,11 +1,12 @@
 <template>
-    <el-dialog :title="$t('work.senior') || '高级设置'" :visible.sync="visibleSync" width="780px" append-to-body
+    <el-dialog :title="$t('work.senior')" :visible.sync="visibleSync" width="780px" append-to-body
         custom-class="grand-dialog" :close-on-click-modal="false" top="5vh" @close="handleClose">
         <div class="grand-setting-content" style="max-height: 75vh; overflow-y: auto; padding-right: 10px;">
             <el-form :model="form" label-position="right" label-width="120px" size="small">
 
                 <!-- 动态分模式渲染 -->
-                <basic-config :form="form" :file-form="fileForm" :options="options" />
+                <basic-config :form="form" :file-form="fileForm" :options="options" :printer-list="printerList"
+                    :size-form="sizeForm" />
 
                 <!-- 高级功能（ISO/ZIP/HASH/计数器） -->
                 <advanced-features :form="form" :file-form="fileForm" />
@@ -54,6 +55,14 @@ export default {
         options: {
             type: Object,
             default: () => ({})
+        },
+        printerList: {
+            type: Array,
+            default: () => []
+        },
+        sizeForm: {
+            type: [Number, String],
+            default: null
         }
     },
     computed: {
@@ -74,32 +83,32 @@ export default {
             // 验证加密狗计数
             if (this.form.is_dongle_count) {
                 if (!this.form.dongle_count || this.form.dongle_count <= 0 || !Number.isInteger(this.form.dongle_count)) {
-                    this.$message.warning(this.$t('work.dongleCountRequired') || '请输入有效的加密狗安装次数（必须是正整数）')
+                    this.$message.warning(this.$t('work.dongleCountRequired'))
                     return
                 }
             }
 
             // 验证 ISO 文件名
             if (this.form.is_generate_iso && !this.form.iso_file_name) {
-                this.$message.warning(this.$t('work.isoNameInput') || '请输入 ISO 文件名')
+                this.$message.warning(this.$t('work.isoNameInput'))
                 return
             }
 
             // 验证 ZIP 文件名
             if (this.form.is_generate_zip) {
                 if (!this.form.zip_file_name) {
-                    this.$message.warning(this.$t('work.zipNameInput') || '请输入 ZIP 文件名')
+                    this.$message.warning(this.$t('work.zipNameInput'))
                     return
                 }
 
                 // 验证 ZIP 加密密码
                 if (this.form.is_zip_encrypt) {
                     if (!this.form.zip_password) {
-                        this.$message.warning(this.$t('work.pleasePassword') || '请输入 ZIP 压缩密码')
+                        this.$message.warning(this.$t('work.pleasePassword'))
                         return
                     }
                     if (this.form.zip_password !== this.form.zip_repassword) {
-                        this.$message.warning(this.$t('work.zipPassWrong') || 'ZIP 压缩密码不一致')
+                        this.$message.warning(this.$t('work.zipPassWrong'))
                         return
                     }
                 }
