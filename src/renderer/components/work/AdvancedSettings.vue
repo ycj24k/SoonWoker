@@ -17,13 +17,6 @@
 
             </el-form>
         </div>
-        <span slot="footer" class="dialog-footer grand-footer">
-            <div class="footer-buttons">
-                <el-button @click="handleClose" size="medium" icon="el-icon-close">{{ $t('common.cancel') }}</el-button>
-                <el-button type="primary" @click="handleSave" size="medium" icon="el-icon-check">{{ $t('common.confirm')
-                    }}</el-button>
-            </div>
-        </span>
     </el-dialog>
 </template>
 
@@ -81,8 +74,8 @@ export default {
         },
         handleSave() {
             // 验证加密狗计数
-            if (this.form.is_dongle_count) {
-                if (!this.form.dongle_count || this.form.dongle_count <= 0 || !Number.isInteger(this.form.dongle_count)) {
+            if (this.form.enable_dongle_counter) {
+                if (!this.form.install_dongle_count || this.form.install_dongle_count < 0 || !Number.isInteger(this.form.install_dongle_count)) {
                     this.$message.warning(this.$t('work.dongleCountRequired'))
                     return
                 }

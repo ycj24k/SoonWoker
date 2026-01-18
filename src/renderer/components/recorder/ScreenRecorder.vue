@@ -3,7 +3,7 @@
     <template v-if="!statusOnly">
       <el-tooltip :content="isRecording ? $t('recorder.stopRecording') : $t('recorder.startRecording')" placement="top">
         <el-button size="medium" :type="isRecording ? 'danger' : 'primary'"
-          :icon="isRecording ? 'el-icon-video-pause' : 'el-icon-video-camera'" circle @click="toggleRecording"
+          :icon="isRecording ? 'el-icon-switch-button' : 'el-icon-video-camera'" circle @click="toggleRecording"
           :loading="loading" class="record-btn">
         </el-button>
       </el-tooltip>
@@ -43,7 +43,9 @@ export default {
       timer: null,
       stream: null,
       currentTaskId: '', // 录屏开始时的任务ID
-      autoSave: true // 是否在停止时保存
+      autoSave: true, // 是否在停止时保存
+      videoPath: '', // 录制视频的绝对路径
+      customSavePath: '' // 存储启动时传入的保存路径
     };
   },
   methods: {
@@ -86,6 +88,7 @@ export default {
 
         this.stream = stream;
         this.recordedChunks = [];
+        this.customSavePath = options.savePath || ''; // 保存自定义路径
 
         // 创建MediaRecorder
         this.mediaRecorder = new MediaRecorder(stream, {
@@ -100,7 +103,7 @@ export default {
 
         this.mediaRecorder.onstop = async () => {
           if (this.autoSave) {
-            await this.saveRecording(options.savePath);
+            await this.saveRecording(this.customSavePath); // 使用保存的路径
           }
           this.recordedChunks = [];
         };
@@ -130,7 +133,22 @@ export default {
 
       try {
         if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
-          this.mediaRecorder.stop();
+          // 创建 Promise 等待 onstop 回调完成
+          await new Promise((resolve) => {
+            // 保存原有的 onstop 处理器
+            const originalOnStop = this.mediaRecorder.onstop;
+
+            // 包装 onstop，在原处理器完成后 resolve
+            this.mediaRecorder.onstop = async (event) => {
+              if (originalOnStop) {
+                await originalOnStop.call(this, event);
+              }
+              resolve();
+            };
+
+            // 触发 stop 事件
+            this.mediaRecorder.stop();
+          });
         }
 
         // 停止所有轨道
@@ -161,33 +179,47 @@ export default {
         return;
       }
 
-      try {
-        // 将录制的数据块合并为Blob
-        const blob = new Blob(this.recordedChunks, {
-          type: 'video/webm'
-        });
+      return new Promise((resolve, reject) => {
+        try {
+          // 将录制的数据块合并为Blob
+          const blob = new Blob(this.recordedChunks, {
+            type: 'video/webm'
+          });
 
-        // 转换为base64
-        const reader = new FileReader();
-        reader.onloadend = async () => {
-          const base64data = reader.result;
+          // 转换为base64
+          const reader = new FileReader();
+          reader.onloadend = async () => {
+            if (this._isDestroyed) return;
+            try {
+              const base64data = reader.result;
 
-          // 发送到主进程保存，传递任务ID和可选路径
-          const result = await ipcRenderer.invoke('stop-recording', base64data, this.currentTaskId, customPath);
+              // 发送到主进程保存，传递任务ID和可选路径
+              const result = await ipcRenderer.invoke('stop-recording', base64data, this.currentTaskId, customPath);
 
-          if (result.success) {
-            this.$message.success(this.$t('recorder.savedSuccess') + `: ${result.fileName}`);
-            this.$emit('recording-saved', result);
-          } else {
-            this.$message.error(result.message);
-          }
-        };
-        reader.readAsDataURL(blob);
+              if (this._isDestroyed) return;
 
-      } catch (error) {
-        console.error('保存录制失败:', error);
-        this.$message.error(this.$t('recorder.saveFailed'));
-      }
+              if (result.success) {
+                this.$message.success(this.$t('recorder.savedSuccess') + `: ${result.fileName}`);
+                this.videoPath = result.filePath; // 保存视频绝对路径供外部使用
+                this.$emit('recording-saved', result);
+                resolve(result);
+              } else {
+                this.$message.error(result.message);
+                reject(new Error(result.message));
+              }
+            } catch (err) {
+              reject(err);
+            }
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+
+        } catch (error) {
+          console.error('保存录制失败:', error);
+          this.$message.error(this.$t('recorder.saveFailed'));
+          reject(error);
+        }
+      });
     },
 
     startTimer() {

@@ -95,18 +95,15 @@
             </div>
             <div class="g-switch-item">
                 <span class="g-label">{{ $t('work.installDongle') }}</span>
-                <el-switch v-model="form.is_dongle_count"></el-switch>
+                <el-switch v-model="form.enable_dongle_counter"></el-switch>
             </div>
         </div>
 
         <!-- 计数器详细 -->
-        <div v-if="form.is_dongle_count" class="mt-10 p-10"
+        <div v-if="form.enable_dongle_counter" class="mt-10 p-10"
             style="background: #fdf6ec; border-radius: 6px; border: 1px solid #faecd8;">
-            <el-form-item :label="$t('work.installCount')" label-width="140px" class="mb-5">
-                <el-input-number v-model="form.dongle_count" :min="1" :step="1" :precision="0" size="mini" />
-            </el-form-item>
-            <el-form-item :label="$t('work.authCode')" label-width="140px" class="mb-0">
-                <el-input v-model="form.auth_code" size="mini" :placeholder="$t('work.inputAuthCode')" />
+            <el-form-item :label="$t('work.installCount')" label-width="140px" class="mb-0">
+                <el-input-number v-model="form.install_dongle_count" :min="0" :step="1" :precision="0" size="mini" />
             </el-form-item>
         </div>
     </div>

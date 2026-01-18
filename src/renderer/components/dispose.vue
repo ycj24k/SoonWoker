@@ -125,11 +125,11 @@ export default {
   methods: {
     // 获取配置
     getConfig() {
-      this.$axios.get('/admin/get_config')
+      this.$axios.get('/web/get_config')
         .then(res => {
           if (res && res.data) {
             // 合并数据，确保所有字段都存在
-            this.iniData = { ...this.iniData, ...res.data };
+            this.iniData = { ...this.iniData, ...res.data.data };
           } else {
             this.$message.error(this.$t("dispose.errorRead"));
           }
@@ -139,23 +139,23 @@ export default {
           this.$message.error(this.$t("dispose.errorRead"));
         });
     },
-    // 保存配置
     save() {
-      this.$axios.post('/admin/get_config', this.iniData)
+      // 构造 query string
+      let params = [];
+      for (let key in this.iniData) {
+        if (this.iniData.hasOwnProperty(key)) {
+          // 使用 encodeURIComponent 确保特殊字符正确传输
+          params.push(`${key}=${encodeURIComponent(this.iniData[key])}`);
+        }
+      }
+      const queryString = params.join('&');
+
+      this.$axios.post(`/web/update_config?${queryString}`)
         .then(res => {
-          if (res && (res.data === "success" || res.status === 200)) {
-            this.$message({
-              type: "success",
-              message: this.$t("dispose.successReserve"),
-            });
-          } else {
-            // 某些接口可能返回 { ret: 0 } 或其他形式，视具体情况而定
-            // 这里假设200 OK即为成功，或者根据res.data判断
-            this.$message({
-              type: "success",
-              message: this.$t("dispose.successReserve"),
-            });
-          }
+          this.$message({
+            type: "success",
+            message: this.$t("dispose.successReserve"),
+          });
         })
         .catch(err => {
           console.error(err);

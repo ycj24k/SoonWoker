@@ -13,17 +13,12 @@
             <!-- 右侧功能按钮 -->
             <div class="header-buttons">
                 <!-- 录制组件 (绿色圆形) -->
-                <div class="recorder-wrapper" v-if="isRecording || high_setting_form.is_print_logo">
+                <div class="recorder-wrapper"
+                    v-if="isRecording || high_setting_form.record_screen || high_setting_form.print_record_logo">
                     <screen-recorder ref="screenRecorder" :task-id="upload_disk" :status-only="true"
                         @recording-started="onRecordingStarted" @recording-stopped="onRecordingStopped"
                         @recording-saved="onRecordingSaved" />
-                    <el-tooltip content="打印" placement="top">
-                        <div v-if="high_setting_form.is_print_logo" class="print-logo-indicator">
-                            <img src="static/images/luzhi.png" @error="onLogoError" v-if="!logoError"
-                                class="logo-img" />
-                            <i v-else class="el-icon-printer"></i>
-                        </div>
-                    </el-tooltip>
+
                 </div>
 
                 <!-- 高级设置按钮 (白色) -->
@@ -168,6 +163,7 @@ export default {
             switch_cont: true,
             switch_tag: true,
             submitLoading: false,
+            sysAuthCode: '', // 系统配置授权码
 
             // 新手引导
             guideStep: null,
@@ -191,25 +187,31 @@ export default {
 
             // 高级设置表单
             high_setting_form: {
+                // 基础配置
                 priority: 0,
                 fileSystem: 0,
                 target_work: 0,
                 color_type: 0,
-                s1: false,
-                s2: false,
-                s3: false,
+                formatFile: 0,
+
+                // 开关选项
+                s1: false, // 生成MD5 HASH文件
+                s2: false, // 打印MD5到HASH字段
+                s3: false, // 失败打印标签
                 s4: false,
                 s5: false,
+
+                // 密码相关
                 pass: '',
                 repass: '',
-                localfiles: false,
-                formatFile: 0,
-                Span_USBcard: false,
-                hasAddFile: false,
-                is_blend: false,
-                is_record: false,
-                record_path: '',
-                is_print_logo: false,
+
+                // 功能开关
+                localfiles: false, // 本地文件
+                Span_USBcard: false, // 允许跨卡
+                hasAddFile: false, // 预设内容拷贝
+                is_blend: false, // 混合模式
+
+                // ISO/ZIP 生成
                 is_generate_iso: false,
                 iso_file_name: '',
                 is_generate_zip: false,
@@ -217,10 +219,17 @@ export default {
                 is_zip_encrypt: false,
                 zip_password: '',
                 zip_repassword: '',
-                copy_hash: false,
-                is_dongle_count: false,
-                dongle_count: 1,
-                auth_code: ''
+                copy_hash: false, // 拷贝HASH文件到存储卡
+
+                // 屏幕录制（重要：确保字段名称一致）
+                record_screen: false, // 启用屏幕录制
+                record_screen_path: '', // 录制路径
+                print_record_logo: false, // 打印录制标识
+
+                // 硬件管控（重要：确保字段名称与提交逻辑一致）
+                enable_dongle_counter: false, // 启用加密狗计数
+                install_dongle_count: 0, // 安装次数（默认为0而不是1）
+                auth_code: '' // 授权码
             }
         }
     },
@@ -276,6 +285,8 @@ export default {
         }
     },
     created() {
+        // 重置后台录制状态，防止刷新后状态卡死
+        ipcRenderer.invoke('reset-recording').catch(e => console.error('Reset recording failed:', e))
         extendStringPrototypes()
         this.upload_disk = genTaskUUID()
     },
@@ -328,15 +339,15 @@ export default {
                     this.high_setting_form = { ...this.high_setting_form, ...savedForm, ...defaults }
 
                     // 仅在路径为空时初始化默认路径（兼容三端）
-                    if (!this.high_setting_form.record_path) {
-                        this.high_setting_form.record_path = this.getDefaultRecordPath();
+                    if (!this.high_setting_form.record_screen_path) {
+                        this.high_setting_form.record_screen_path = this.getDefaultRecordPath();
                     }
                 } catch (e) {
                     console.error('Failed to parse high settings')
                 }
             } else {
                 // 无缓存时初始化默认路径
-                this.high_setting_form.record_path = this.getDefaultRecordPath();
+                this.high_setting_form.record_screen_path = this.getDefaultRecordPath();
             }
             this.juanbiao_form = getNowFormatDate()
             this.print_flag = this.dice === 1 ? 2 : 1
@@ -352,6 +363,17 @@ export default {
                     this.guideStep[this.currentStep].show = true
                 }, 200)
             }
+            this.getSystemConfig(); // 获取系统配置
+        },
+
+        getSystemConfig() {
+            this.$axios.get('/web/get_config').then((res) => {
+                if (res.data.code === 200 && res.data.data) {
+                    this.sysAuthCode = res.data.data.AuthorizationCode || '';
+                }
+            }).catch(err => {
+                console.error('Failed to get system config', err);
+            });
         },
 
         // --- 高级设置与录制 ---
@@ -391,8 +413,9 @@ export default {
             const recorder = this.$refs.screenRecorder;
             if (recorder) {
                 if (recorder.isRecording) {
-                    recorder.stopRecording(true);
+                    this.$message.warning(this.$t('recorder.recording'));
                 } else {
+                    this.highSettingVisible = false;
                     recorder.startRecording({
                         savePath: recordPath || this.getDefaultRecordPath()
                     });
@@ -440,7 +463,8 @@ export default {
                         if ([1, 3, 4, 5].includes(item.type)) {
                             const defaultVal = item.DefaultText !== undefined ? item.DefaultText : ''
                             this.tableData.push({
-                                name: item.name + this.$t('work.front_tag'),
+                                name: item.name,
+                                sideLabel: this.$t('work.front_tag'),
                                 val: defaultVal,
                                 origin_name: item.name,
                                 type: item.type,
@@ -457,7 +481,8 @@ export default {
                         if ([1, 3, 4, 5].includes(item.type)) {
                             const defaultVal = item.DefaultText !== undefined ? item.DefaultText : ''
                             this.tableData.push({
-                                name: item.name + this.$t('work.back_tag'),
+                                name: item.name,
+                                sideLabel: this.$t('work.back_tag'),
                                 val: defaultVal,
                                 origin_name: item.name,
                                 type: item.type,
@@ -991,14 +1016,12 @@ export default {
                 '&zip_file_name=' + (that.high_setting_form.zip_file_name || '') +
                 '&is_zip_encrypt=' + (String(that.high_setting_form.is_zip_encrypt) || 'false') +
                 '&zip_password=' + (that.high_setting_form.zip_password || '') +
-                '&copy_hash=' + (String(that.high_setting_form.copy_hash) || 'false') +
-                '&enable_dongle_counter=' + (String(that.high_setting_form.enable_dongle_counter) || 'false') +
-                '&auth_code=' + (that.high_setting_form.auth_code || '');
+                '&copy_hash=' + (String(that.high_setting_form.copy_hash) || 'false');
 
             data += '&is_blend=' + (String(that.high_setting_form.is_blend) || 'false');
 
             // Log path logic
-            if (that.high_setting_form.record_screen && that.$refs.screenRecorder && that.$refs.screenRecorder.videoPath) {
+            if (that.$refs.screenRecorder && that.$refs.screenRecorder.videoPath) {
                 data += '&record_path=' + that.$refs.screenRecorder.videoPath;
             } else {
                 data += '&record_path=';
@@ -1006,16 +1029,31 @@ export default {
             data += '&is_printer_record_logo=' + (String(that.high_setting_form.print_record_logo) || 'false');
 
             if (that.high_setting_form.enable_dongle_counter) {
-                data += '&donglel_install_count=' + (that.high_setting_form.install_dongle_count || 0);
+                data += '&dongle_install_count=' + (that.high_setting_form.install_dongle_count || 1);
             } else {
-                data += '&donglel_install_count=0';
+                data += '&dongle_install_count=-1';
             }
 
             // File Type Mapping
             const fileTypeMap = { 0: 1, 1: 2, 2: 3, 4: 4 };
             let apiFileType = fileTypeMap[that.file_form] || 1;
-            data += '&file_type=' + apiFileType;
-            console.log('提交参数预览:', data_param + data)
+            // --- DEBUG: 输出提交数据 ---
+            console.group('任务提交数据详情');
+
+            // 将查询字符串解析为对象，方便查看
+            const queryString = data_param + data;
+            const params = {};
+            queryString.split('&').forEach(part => {
+                if (part) {
+                    const [key, val] = part.split('=');
+                    params[key] = decodeURIComponent(val || '');
+                }
+            });
+            console.log('提交参数对象 (JSON):', params);
+
+            console.log('高级设置表单:', JSON.parse(JSON.stringify(that.high_setting_form))); // 深拷贝打印
+            console.groupEnd();
+
             // Submit Flow
             if (this.isCopy) {
                 this.submitLoading = true
@@ -1047,9 +1085,8 @@ export default {
 
         localUpload(pathName, data_param, data) {
             let file_path = []
-            // 注意: 这里使用 getLists() 可能需要适配 legacy 的 filesList 结构
-            // 如果 filesList[i].path 是正确路径，则无需更改
-            const list = this.$refs.files.filesList // Prefer direct filesList if available like legacy
+            // FileManagement 组件不直接暴露 filesList，需使用 getLists()
+            const list = this.$refs.files.getLists()
             for (let i in list) {
                 file_path.push(list[i].path)
             }

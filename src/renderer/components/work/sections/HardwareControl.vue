@@ -8,14 +8,14 @@
             <el-col :span="12">
                 <div class="hardware-box">
                     <div class="mb-10">
-                        <el-checkbox v-model="form.is_dongle_count">
+                        <el-checkbox v-model="form.enable_dongle_counter">
                             {{ $t('work.installDongle') }}
                         </el-checkbox>
                     </div>
                     <transition name="el-zoom-in-top">
-                        <div v-if="form.is_dongle_count" class="ml-20">
+                        <div v-if="form.enable_dongle_counter" class="ml-20">
                             <el-form-item :label="$t('work.installCount')" label-width="80px">
-                                <el-input-number size="small" v-model="form.dongle_count" :min="1" :max="999" />
+                                <el-input-number size="small" v-model="form.install_dongle_count" :min="0" :max="999" />
                             </el-form-item>
                         </div>
                     </transition>

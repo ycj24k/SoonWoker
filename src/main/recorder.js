@@ -14,6 +14,14 @@ class ScreenRecorder {
     this.mainWindow = window;
   }
 
+  // 重置录制状态（用于前端初始化时清理可能的僵尸状态）
+  resetRecording() {
+    this.isRecording = false;
+    this.recordedChunks = [];
+    console.log('Recording state reset by renderer');
+    return { success: true, message: 'State reset' };
+  }
+
   async startRecording() {
     if (this.isRecording) {
       return { success: false, message: '正在录制中' };
@@ -33,11 +41,11 @@ class ScreenRecorder {
       // 发送源ID到渲染进程
       const sourceId = sources[0].id;
       this.isRecording = true;
-      
-      return { 
-        success: true, 
+
+      return {
+        success: true,
         sourceId: sourceId,
-        message: '开始录制' 
+        message: '开始录制'
       };
     } catch (error) {
       console.error('启动录制失败:', error);
@@ -45,19 +53,30 @@ class ScreenRecorder {
     }
   }
 
-  async stopRecording(videoData, taskId = '') {
+  async stopRecording(videoData, taskId = '', customPath = null) {
     if (!this.isRecording) {
       return { success: false, message: '当前没有进行录制' };
     }
 
     try {
       this.isRecording = false;
-      
-      // 确保videos目录存在 - 在应用根目录下
-      const appPath = process.env.NODE_ENV === 'development' 
-        ? path.join(__dirname, '../../') 
+
+      // 获取应用根目录
+      const appPath = process.env.NODE_ENV === 'development'
+        ? path.join(__dirname, '../../')
         : path.dirname(app.getPath('exe'));
-      const videosDir = path.join(appPath, 'videos');
+
+      let videosDir;
+      if (customPath) {
+        // 如果是绝对路径直接使用，否则拼接应用根目录
+        videosDir = path.isAbsolute(customPath)
+          ? customPath
+          : path.join(appPath, customPath);
+      } else {
+        // 默认目录：应用根目录/videos
+        videosDir = path.join(appPath, 'videos');
+      }
+
       if (!fs.existsSync(videosDir)) {
         fs.mkdirSync(videosDir, { recursive: true });
       }
@@ -71,9 +90,9 @@ class ScreenRecorder {
       const minutes = String(now.getMinutes()).padStart(2, '0');
       const seconds = String(now.getSeconds()).padStart(2, '0');
       const dateTimeStr = `${year}${month}${day}_${hours}${minutes}${seconds}`;
-      
+
       // 如果有任务ID，使用任务ID_日期时间，否则使用日期时间
-      const fileName = taskId 
+      const fileName = taskId
         ? `${taskId}_${dateTimeStr}.webm`
         : `${dateTimeStr}.webm`;
       const filePath = path.join(videosDir, fileName);
@@ -83,12 +102,12 @@ class ScreenRecorder {
       fs.writeFileSync(filePath, buffer);
 
       console.log('视频已保存到:', filePath);
-      
-      return { 
-        success: true, 
+
+      return {
+        success: true,
         filePath: filePath,
         fileName: fileName,
-        message: '录制已保存' 
+        message: '录制已保存'
       };
     } catch (error) {
       console.error('停止录制失败:', error);
@@ -98,8 +117,8 @@ class ScreenRecorder {
 
   // 获取videos目录路径
   getVideosPath() {
-    const appPath = process.env.NODE_ENV === 'development' 
-      ? path.join(__dirname, '../../') 
+    const appPath = process.env.NODE_ENV === 'development'
+      ? path.join(__dirname, '../../')
       : path.dirname(app.getPath('exe'));
     return path.join(appPath, 'videos');
   }
@@ -113,12 +132,16 @@ ipcMain.handle('start-recording', async () => {
   return await recorder.startRecording();
 });
 
-ipcMain.handle('stop-recording', async (event, videoData, taskId) => {
-  return await recorder.stopRecording(videoData, taskId);
+ipcMain.handle('stop-recording', async (event, videoData, taskId, customPath) => {
+  return await recorder.stopRecording(videoData, taskId, customPath);
 });
 
 ipcMain.handle('get-videos-path', () => {
   return recorder.getVideosPath();
+});
+
+ipcMain.handle('reset-recording', async () => {
+  return recorder.resetRecording();
 });
 
 // 使用全局变量方式，避免webpack模块转换问题

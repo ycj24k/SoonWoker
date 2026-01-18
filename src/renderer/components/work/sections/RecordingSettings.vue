@@ -8,22 +8,21 @@
             <div class="grand-switch-grid mb-10">
                 <div class="g-switch-item">
                     <span class="g-label">{{ $t('work.enableScreenRecord') }}</span>
-                    <el-switch v-model="form.is_record"></el-switch>
+                    <el-switch v-model="form.record_screen"></el-switch>
                 </div>
-                <div class="g-switch-item" v-if="form.is_record">
+                <div class="g-switch-item" v-if="form.record_screen">
                     <div class="flex-align-center">
                         <span class="g-label">{{ $t('work.printRecordLogo') }}</span>
-                        <i v-if="form.is_print_logo" class="el-icon-picture ml-5 logo-icon-active"
-                            title="luzhi.png"></i>
+
                     </div>
-                    <el-switch v-model="form.is_print_logo"></el-switch>
+                    <el-switch v-model="form.print_record_logo"></el-switch>
                 </div>
             </div>
 
-            <div v-if="form.is_record" class="path-box-container">
+            <div v-if="form.record_screen" class="path-box-container">
                 <div class="path-box">
                     <el-form-item :label="$t('work.recordPath')" label-width="110px">
-                        <el-input v-model="form.record_path" :placeholder="$t('work.defaultPath')" size="small">
+                        <el-input v-model="form.record_screen_path" :placeholder="$t('work.defaultPath')" size="small">
                             <el-button slot="append" icon="el-icon-folder-opened" @click="selectRecordPath"></el-button>
                         </el-input>
                     </el-form-item>
@@ -59,12 +58,12 @@ export default {
                 properties: ['openDirectory']
             }).then(result => {
                 if (!result.canceled && result.filePaths.length > 0) {
-                    this.$set(this.form, 'record_path', result.filePaths[0])
+                    this.$set(this.form, 'record_screen_path', result.filePaths[0])
                 }
             })
         },
         testRecording() {
-            this.$emit('test-recording', this.form.record_path);
+            this.$emit('test-recording', this.form.record_screen_path);
         }
     }
 }
