@@ -70,13 +70,18 @@
                     <div class="field-input-area">
                         <!-- 图片类型 -->
                         <div v-if="item.type == 1" class="image-upload-wrapper">
+                            <!-- 预览图 -->
+                            <div v-if="imgPreviews[item.origin_name]" class="image-preview mb-5">
+                                <img :src="imgPreviews[item.origin_name]" class="preview-img" />
+                            </div>
+
                             <label :for="'upload-' + item.origin_name" class="upload-label">
                                 <i class="el-icon-picture-outline"></i>
                                 <span>{{ $t('work.selectImage') }}</span>
                             </label>
                             <input :id="'upload-' + item.origin_name" type="file" accept="image/*"
                                 :ref="item.origin_name" :data-name="item.origin_name" class="hidden-file-input"
-                                @change="(e) => $emit('image-change', item.origin_name, e.target.files[0])" />
+                                @change="(e) => handleImageChange(item.origin_name, e)" />
                         </div>
 
                         <!-- 文本/条码类型 -->
@@ -122,7 +127,8 @@ export default {
     },
     data() {
         return {
-            currentTemplateLocal: this.currentTemplate
+            currentTemplateLocal: this.currentTemplate,
+            imgPreviews: {}
         }
     },
     watch: {
@@ -135,6 +141,20 @@ export default {
         },
         setPrintFlag(flag) {
             this.$emit('update:print-flag', flag)
+        },
+        handleImageChange(fieldName, event) {
+            const file = event.target.files[0]
+            if (file) {
+                // 生成预览URL
+                if (this.imgPreviews[fieldName]) {
+                    URL.revokeObjectURL(this.imgPreviews[fieldName]) // 释放旧URL
+                }
+                const url = URL.createObjectURL(file)
+                this.$set(this.imgPreviews, fieldName, url)
+
+                // 触发原有事件
+                this.$emit('image-change', fieldName, file)
+            }
         }
     }
 }
@@ -269,6 +289,26 @@ export default {
 /* 图片上传样式 */
 .image-upload-wrapper {
     width: 100%;
+}
+
+.image-preview {
+    width: 100%;
+    height: 80px;
+    /* 固定高度或自适应 */
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px dashed #d1d5db;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f9fafb;
+    margin-bottom: 8px;
+}
+
+.preview-img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
 }
 
 .upload-label {

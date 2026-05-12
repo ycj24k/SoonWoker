@@ -102,9 +102,20 @@
         <!-- 计数器详细 -->
         <div v-if="form.enable_dongle_counter" class="mt-10 p-10"
             style="background: #fdf6ec; border-radius: 6px; border: 1px solid #faecd8;">
-            <el-form-item :label="$t('work.installCount')" label-width="140px" class="mb-0">
-                <el-input-number v-model="form.install_dongle_count" :min="0" :step="1" :precision="0" size="mini" />
-            </el-form-item>
+            <el-row :gutter="20">
+                <el-col :span="10">
+                    <el-form-item :label="$t('work.installCount')" label-width="120px" class="mb-0">
+                        <el-input-number v-model="form.install_dongle_count" :min="0" :step="1" :precision="0"
+                            size="mini" controls-position="right" style="width: 100%;" />
+                    </el-form-item>
+                </el-col>
+                <el-col :span="14">
+                    <el-form-item :label="$t('work.authCode')" label-width="100px" class="mb-0">
+                        <el-input v-model="form.auth_code" :placeholder="$t('work.inputAuthCode')" size="mini"
+                            style="width: 100%;" />
+                    </el-form-item>
+                </el-col>
+            </el-row>
         </div>
     </div>
 </template>

@@ -113,10 +113,26 @@ export default {
         },
         formatOptions() {
             return [
-                { value: 0, label: this.$t('work.auto') },
-                { value: 1, label: 'FAT32' },
-                { value: 2, label: 'exFAT' },
-                { value: 3, label: 'NTFS' }
+                {
+                    value: 0,
+                    label: this.$t("work.auto"),
+                },
+                {
+                    value: "FAT",
+                    label: "FAT",
+                },
+                {
+                    value: "FAT32",
+                    label: "FAT32",
+                },
+                {
+                    value: "NTFS",
+                    label: "NTFS",
+                },
+                {
+                    value: "EXFAT",
+                    label: "EXFAT",
+                },
             ]
         }
     }

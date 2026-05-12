@@ -795,7 +795,7 @@ export default {
             );
             await this.$axios({
               method: "post",
-              url: `/admin/format_disk_notype?drive_path=${disk[0]}:&drive_type=${this.formatValue}`,
+              url: `/admin/format_disk?drive_path=${disk[0]}:&drive_type=${this.formatValue}`,
             })
               .then((res) => {
                 //正常格式化
